@@ -28,7 +28,7 @@ export interface SystemConfigState {
 }
 
 export const configTypeLabels: Record<ConfigType, string> = {
-  docker_compose: 'Docker Compose',
+  'docker-compose': 'Docker Compose',
   systemd: 'Systemd Unit',
   nginx: 'NGINX Config',
   wireguard: 'WireGuard Config',

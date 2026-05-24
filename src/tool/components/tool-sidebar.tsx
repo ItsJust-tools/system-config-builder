@@ -1,8 +1,10 @@
 'use client';
 
+import type { SystemService } from '../types';
+
 interface ToolSidebarProps {
   title: string;
-  services: any[];
+  services: SystemService[];
   type: string;
 }
 

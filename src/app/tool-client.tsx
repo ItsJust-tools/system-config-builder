@@ -1,27 +1,30 @@
 'use client';
 
 import { useCallback, useRef } from 'react';
-import { configBuilderTool, ToolCanvas, ToolToolbar, ToolSidebar, templateMetadata } from '@/tool';
-import { useToolState, useExport } from '@itsjust/core';
+import { configBuilderTool, ToolCanvas, ToolToolbar, ToolSidebar } from '@/tool';
+import type { ConfigType } from '@/tool';
+import { useToolState, useExport, useShare } from '@itsjust/core';
 
 export default function ToolClient() {
   const canvasRef = useRef<HTMLDivElement>(null);
 
+  const toolConfig = configBuilderTool.config;
+
   const state = useToolState<typeof configBuilderTool.initialState>(configBuilderTool.initialState, {
     key: 'system-config-builder',
-    maxHistory: 100,
-    autoSaveDelay: 0,
+    maxHistoryEntries: 100,
+    debounceMs: 0,
   });
 
   const { exportTo, supportedFormats, isExporting } = useExport(
     canvasRef,
     toolConfig,
-    state.serialize,
+    () => configBuilderTool.serialize(state.data),
   );
 
-  const toolConfig = configBuilderTool.config;
+  const { downloadShareFile, shareViaWeb } = useShare();
 
-  const handleExport = useCallback(async (format: string) => {
+  const handleExport = useCallback(async (format: 'png' | 'pdf' | 'json' | 'jpeg' | 'webp') => {
     await exportTo(format);
   }, [exportTo]);
 
@@ -29,7 +32,7 @@ export default function ToolClient() {
     <>
       <ToolToolbar
         type={state.data.type}
-        onTypeChange={(type) => state.setData((prev) => ({ ...prev, type }))}
+        onTypeChange={(type) => state.setData((prev) => ({ ...prev, type: type as ConfigType }))}
         onExport={() => handleExport('json')}
       />
       <ToolCanvas
@@ -52,7 +55,7 @@ export default function ToolClient() {
           onClick={async () => {
             await downloadShareFile({
               toolId: toolConfig.id,
-              content: state.serialize(),
+              content: configBuilderTool.serialize(state.data),
               metadata: { schemaVersion: '1.0' },
             });
           }}
@@ -77,7 +80,7 @@ export default function ToolClient() {
           onClick={async () => {
             await shareViaWeb({
               toolId: toolConfig.id,
-              content: state.serialize(),
+              content: configBuilderTool.serialize(state.data),
               metadata: { schemaVersion: '1.0' },
             });
           }}
