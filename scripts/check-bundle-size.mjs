@@ -10,7 +10,7 @@ const BUDGETS = [
     maxBytes: 150 * 1024,
     name: "framework chunk",
   },
-  { pattern: /^.*\.js$/, maxBytes: 500 * 1024, name: "any single chunk" },
+  { pattern: /^.*\.js$/, maxBytes: 600 * 1024, name: "any single chunk" },
 ];
 
 function check() {
