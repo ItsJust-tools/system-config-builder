@@ -63,5 +63,9 @@ export const configBuilderTool: Tool<SystemConfigState> = {
       error: 'Invalid data format: expected { type: string, title: string, description: string, services: Service[], network?: string, volumeDriver?: string, notes?: string }',
     };
   },
-  exporters: [],
+  exporters: [
+    { format: 'png', loader: () => import('./exporters/png') },
+    { format: 'webp', loader: () => import('./exporters/webp') },
+    { format: 'pdf', loader: () => import('./exporters/pdf') },
+  ],
 };
