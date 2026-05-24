@@ -1,11 +1,11 @@
 export type ConfigType =
-  | 'docker-compose'
-  | 'systemd'
-  | 'nginx'
-  | 'wireguard'
-  | 'supervisor'
-  | 'traefik'
-  | 'dockerfile';
+  | "docker-compose"
+  | "systemd"
+  | "nginx"
+  | "wireguard"
+  | "supervisor"
+  | "traefik"
+  | "dockerfile";
 
 export interface SystemService {
   name: string;
@@ -28,11 +28,11 @@ export interface SystemConfigState {
 }
 
 export const configTypeLabels: Record<ConfigType, string> = {
-  'docker-compose': 'Docker Compose',
-  systemd: 'Systemd Unit',
-  nginx: 'NGINX Config',
-  wireguard: 'WireGuard Config',
-  supervisor: 'Supervisor Config',
-  traefik: 'Traefik Config',
-  dockerfile: 'Dockerfile',
+  "docker-compose": "Docker Compose",
+  systemd: "Systemd Unit",
+  nginx: "NGINX Config",
+  wireguard: "WireGuard Config",
+  supervisor: "Supervisor Config",
+  traefik: "Traefik Config",
+  dockerfile: "Dockerfile",
 };

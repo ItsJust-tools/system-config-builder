@@ -35,7 +35,7 @@ npm test
 ### Docker Compose
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   web:
@@ -79,15 +79,15 @@ server {
 
 ## Configuration Types
 
-| Type | Description |
-|------|-------------|
-| docker-compose | Container orchestration |
-| dockerfile | Container build instructions |
-| systemd | System service units |
-| nginx | Web server configuration |
-| wireguard | VPN configuration |
-| supervisor | Process manager config |
-| traefik | Reverse proxy config |
+| Type           | Description                  |
+| -------------- | ---------------------------- |
+| docker-compose | Container orchestration      |
+| dockerfile     | Container build instructions |
+| systemd        | System service units         |
+| nginx          | Web server configuration     |
+| wireguard      | VPN configuration            |
+| supervisor     | Process manager config       |
+| traefik        | Reverse proxy config         |
 
 ## Environment Variables
 
@@ -99,6 +99,7 @@ NEXT_PUBLIC_URL=https://system-config-builder.itsjust.tools
 ## Accessibility
 
 This tool respects accessibility:
+
 - Keyboard-only navigation
 - Screen reader support
 - High contrast UI
