@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { SystemService } from "../types";
+import { configTypeLabels } from "../types";
 
 interface ToolCanvasProps {
   title: string;
@@ -14,6 +15,9 @@ interface ToolCanvasProps {
   onDownload?: () => void;
 }
 
+/**
+ * Generates a Docker Compose YAML configuration string from the given parameters.
+ */
 function generateDockerCompose(
   title: string,
   services: SystemService[],
@@ -82,6 +86,9 @@ function generateDockerCompose(
   return lines.join("\n");
 }
 
+/**
+ * Generates a basic Dockerfile template.
+ */
 function generateDockerfile(title: string): string {
   return [
     `# ${title} — Dockerfile`,
@@ -103,6 +110,9 @@ function generateDockerfile(title: string): string {
   ].join("\n");
 }
 
+/**
+ * Generates a systemd unit file template.
+ */
 function generateSystemd(title: string): string {
   return [
     `# ${title} — systemd Unit`,
@@ -128,6 +138,9 @@ function generateSystemd(title: string): string {
   ].join("\n");
 }
 
+/**
+ * Generates an NGINX configuration with proxy pass for the first defined service.
+ */
 function generateNginx(title: string, services: SystemService[]): string {
   const lines: string[] = [
     `# ${title} — NGINX Configuration`,
@@ -172,6 +185,9 @@ function generateNginx(title: string, services: SystemService[]): string {
   return lines.join("\n");
 }
 
+/**
+ * Generates a WireGuard VPN configuration template.
+ */
 function generateWireguard(title: string): string {
   return [
     `# ${title} — WireGuard Configuration`,
@@ -196,6 +212,9 @@ function generateWireguard(title: string): string {
   ].join("\n");
 }
 
+/**
+ * Generates a Supervisor program configuration for each defined service.
+ */
 function generateSupervisor(title: string, services: SystemService[]): string {
   const lines: string[] = [
     `; ${title} — Supervisor Configuration`,
@@ -224,6 +243,9 @@ function generateSupervisor(title: string, services: SystemService[]): string {
   return lines.join("\n");
 }
 
+/**
+ * Generates a Traefik reverse proxy configuration (TOML) for each defined service.
+ */
 function generateTraefik(title: string, services: SystemService[]): string {
   const lines: string[] = [
     `# ${title} — Traefik Configuration`,
@@ -315,6 +337,10 @@ function getFileExtension(configType: string): string {
   }
 }
 
+/**
+ * ToolCanvas displays the generated configuration output and provides
+ * copy-to-clipboard and download actions.
+ */
 export function ToolCanvas({
   title,
   services,
@@ -331,6 +357,14 @@ export function ToolCanvas({
   );
 
   const [copyFeedback, setCopyFeedback] = useState(false);
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    // Cleanup copy feedback timer on unmount
+    return () => {
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+    };
+  }, []);
 
   const handleCopy = useCallback(() => {
     if (navigator.clipboard) {
@@ -338,7 +372,8 @@ export function ToolCanvas({
         .writeText(output)
         .then(() => {
           setCopyFeedback(true);
-          setTimeout(() => setCopyFeedback(false), 2000);
+          if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+          copyTimerRef.current = setTimeout(() => setCopyFeedback(false), 2000);
         })
         .catch(() => {});
     }
@@ -355,7 +390,8 @@ export function ToolCanvas({
         ? "Dockerfile"
         : `${title.replace(/[^a-zA-Z0-9_-]/g, "_")}.${ext}`;
     a.click();
-    URL.revokeObjectURL(url);
+    // Revoke the URL after a short delay to ensure the download starts
+    requestAnimationFrame(() => URL.revokeObjectURL(url));
   }, [output, type, title]);
 
   const servicesEmpty = services.length === 0;
@@ -369,22 +405,7 @@ export function ToolCanvas({
       >
         <div className="config-section">
           <div className="config-type-badge">
-            ⚙️{" "}
-            {type === "docker-compose"
-              ? "Docker Compose"
-              : type === "dockerfile"
-                ? "Dockerfile"
-                : type === "systemd"
-                  ? "systemd Unit"
-                  : type === "nginx"
-                    ? "NGINX"
-                    : type === "wireguard"
-                      ? "WireGuard"
-                      : type === "supervisor"
-                        ? "Supervisor"
-                        : type === "traefik"
-                          ? "Traefik"
-                          : type}
+            ⚙️ {configTypeLabels[type as keyof typeof configTypeLabels] || type}
           </div>
         </div>
         <div className="config-section">
@@ -404,26 +425,16 @@ export function ToolCanvas({
           )}
         </div>
         <div className="config-actions">
-          {onCopy ? (
-            <button
-              type="button"
-              className="config-btn config-btn-primary config-btn-sm"
-              onClick={onCopy}
-              aria-label="Copy configuration to clipboard"
-            >
-              📋 Copy
-            </button>
-          ) : (
-            <button
-              type="button"
-              className={`config-btn config-btn-sm ${copyFeedback ? "config-btn-copied" : "config-btn-primary"}`}
-              onClick={handleCopy}
-              aria-label="Copy configuration to clipboard"
-              aria-live={copyFeedback ? "assertive" : undefined}
-            >
-              {copyFeedback ? "✅ Copied!" : "📋 Copy"}
-            </button>
-          )}
+          <button
+            type="button"
+            className={`config-btn config-btn-sm ${copyFeedback ? "config-btn-copied" : "config-btn-primary"}`}
+            onClick={onCopy || handleCopy}
+            aria-label="Copy configuration to clipboard"
+            aria-live={copyFeedback ? "assertive" : undefined}
+            disabled={servicesEmpty}
+          >
+            {copyFeedback ? "✅ Copied!" : "📋 Copy"}
+          </button>
           <button
             type="button"
             className="config-btn config-btn-secondary config-btn-sm"

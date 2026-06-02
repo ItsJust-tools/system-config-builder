@@ -45,7 +45,9 @@ export default function RootLayout({
           Skip to content
         </a>
         <ThemeProvider toolTheme={toolConfig.theme}>
-          <ToastProvider>{children}</ToastProvider>
+          <ToastProvider>
+            <main id="main-content">{children}</main>
+          </ToastProvider>
         </ThemeProvider>
       </body>
     </html>

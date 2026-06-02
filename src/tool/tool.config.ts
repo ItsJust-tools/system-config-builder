@@ -8,7 +8,7 @@ const toolConfig = {
   name: "System Config Builder",
   description:
     "Generate system configuration files. Create Docker Compose, systemd units, NGINX configs, WireGuard configs, and more.",
-  version: "1.0.0",
+  version: packageJson.version,
   exportFormats: ["json", "png", "pdf"],
   features: {
     export: true,
