@@ -73,7 +73,7 @@ export function useExport(
     }
     const timer = setTimeout(preload, 250);
     return () => clearTimeout(timer);
-  }, [config.exportFormats]);
+  }, [config.exportFormats, engine]);
 
   useEffect(() => {
     if (missing.length === 0 || hasWarnedRef.current) return;
@@ -83,6 +83,8 @@ export function useExport(
         `Add the corresponding exporter to your Tool definition or remove the format from config.exportFormats.`,
     );
   }, [missing]);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
 
   const isExportingRef = useRef(false);
 
@@ -141,7 +143,7 @@ export function useExport(
         abortControllerRef.current = null;
       }
     },
-    [canvasRef, stateSerializer],
+    [canvasRef, stateSerializer, engine],
   );
 
   return {

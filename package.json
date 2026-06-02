@@ -1,6 +1,12 @@
 {
   "name": "system-config-builder",
   "version": "1.0.0",
+  "description": "A client-side tool for generating Docker Compose, systemd units, NGINX configs, WireGuard configs, and more system configuration files.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ItsJust-tools/system-config-builder.git"
+  },
   "private": true,
   "workspaces": [
     "packages/*"

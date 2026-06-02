@@ -802,3 +802,323 @@ body {
   font-weight: 600;
   margin-left: 0.25rem;
 }
+
+/* --- System Config Builder Specific --- */
+
+.config-canvas {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  padding: clamp(1rem, 2.5vw, 2rem);
+  background: var(--card);
+  color: var(--foreground);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.config-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.config-section h3 {
+  font-size: 0.875rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--foreground);
+}
+
+.config-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  background: var(--accent-subtle);
+  color: var(--accent);
+  width: fit-content;
+}
+
+.config-preview {
+  font-family:
+    ui-monospace, Menlo, Monaco, "Cascadia Code", "Segoe UI Mono", monospace;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  padding: 1rem;
+  background: var(--muted-bg);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+  tab-size: 2;
+}
+
+.config-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.config-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.config-btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+}
+
+.config-btn-primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+  box-shadow: var(--shadow-sm);
+}
+
+.config-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.config-btn-secondary {
+  background: var(--card);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+}
+
+.config-btn-secondary:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.config-btn-outline {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+.config-btn-outline:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.config-btn-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+.config-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.config-sidebar .sidebar-section {
+  padding: 0.75rem 1rem;
+}
+
+.config-sidebar .sidebar-section h3 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin: 0 0 0.625rem;
+}
+
+.config-app-card {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 0.5rem;
+}
+
+.config-app-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.config-app-details {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.config-app-name {
+  font-weight: 600;
+  font-size: 0.8125rem;
+  color: var(--foreground);
+}
+
+.config-service-count {
+  font-size: 0.6875rem;
+  color: var(--muted);
+}
+
+.config-services-list {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.config-service-card {
+  padding: 0.5rem;
+  border-radius: 4px;
+  background: var(--card);
+}
+
+.config-service-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.config-service-name {
+  font-weight: 500;
+  font-size: 0.8125rem;
+  color: var(--foreground);
+}
+
+.config-service-image {
+  font-size: 0.6875rem;
+  color: var(--muted);
+}
+
+.config-service-ports {
+  font-size: 0.6875rem;
+  color: var(--muted);
+  margin-top: 0.25rem;
+}
+
+.config-tips {
+  font-size: 0.6875rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.config-tips p {
+  margin: 0 0 0.25rem;
+}
+
+.config-tips p:last-child {
+  margin-bottom: 0;
+}
+
+.config-share-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0;
+  padding: 0.5rem 1rem 1rem;
+}
+
+.config-toolbar-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  justify-content: flex-end;
+}
+
+.config-toolbar-label {
+  font-size: 0.75rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.config-toolbar-select {
+  padding: 0.375rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--foreground);
+  font-size: 0.75rem;
+  font-family: inherit;
+  min-width: 12rem;
+  cursor: pointer;
+}
+
+.config-toolbar-select:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.config-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2.5rem 1rem;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  text-align: center;
+  color: var(--muted);
+}
+
+.config-empty-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.config-empty-state p {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.config-empty-hint {
+  font-size: 0.75rem !important;
+  font-weight: 400 !important;
+  opacity: 0.75;
+}
+
+.config-btn-copied {
+  background: var(--success);
+  color: #fff;
+  border: none;
+}
+
+.config-btn-copied:hover:not(:disabled) {
+  background: var(--success-hover);
+}
+
+@media print {
+  .config-actions {
+    display: none !important;
+  }
+  .config-share-actions {
+    display: none !important;
+  }
+  .config-empty-state {
+    border: 2px dashed #999 !important;
+    color: #666 !important;
+  }
+}

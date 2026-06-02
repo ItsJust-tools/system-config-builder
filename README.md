@@ -1,8 +1,11 @@
 # System Config Builder
 
-A client-side tool for generating system configuration files. Create Docker Compose, systemd units, NGINX configs, WireGuard configs, and more.
-
+[![CI](https://github.com/ItsJust-tools/system-config-builder/actions/workflows/ci.yml/badge.svg)](https://github.com/ItsJust-tools/system-config-builder/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/badge/Version-1.0.0-blue.svg)](https://github.com/ItsJust-tools/system-config-builder)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/ItsJust-tools/system-config-builder/pulls)
+
+A client-side tool for generating system configuration files. Create Docker Compose, systemd units, NGINX configs, WireGuard configs, and more.
 
 ## Features
 

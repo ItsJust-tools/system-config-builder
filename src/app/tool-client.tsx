@@ -24,10 +24,8 @@ export default function ToolClient() {
     },
   );
 
-  const { exportTo, supportedFormats, isExporting } = useExport(
-    canvasRef,
-    toolConfig,
-    () => configBuilderTool.serialize(state.data),
+  const { exportTo, isExporting } = useExport(canvasRef, toolConfig, () =>
+    configBuilderTool.serialize(state.data),
   );
 
   const { downloadShareFile, shareViaWeb } = useShare();
@@ -56,15 +54,12 @@ export default function ToolClient() {
         type={state.data.type}
         canvasRef={canvasRef}
       />
-      <ToolSidebar
-        title={state.data.title}
-        services={state.data.services}
-        type={state.data.type}
-      />
+      <ToolSidebar title={state.data.title} services={state.data.services} />
       {/* Share Actions */}
-      <div style={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}>
+      <div className="config-share-actions">
         <button
           type="button"
+          className="config-btn config-btn-secondary config-btn-sm"
           onClick={async () => {
             await downloadShareFile({
               toolId: toolConfig.id,
@@ -73,23 +68,13 @@ export default function ToolClient() {
             });
           }}
           disabled={isExporting}
-          style={{
-            padding: "0.375rem 0.75rem",
-            border: "1px solid var(--border)",
-            borderRadius: "var(--radius)",
-            background: "var(--card)",
-            color: "var(--foreground)",
-            cursor: isExporting ? "not-allowed" : "pointer",
-            fontSize: "0.8125rem",
-            fontWeight: 500,
-            fontFamily: "inherit",
-          }}
           aria-disabled={isExporting}
         >
-          Download .itsjust.json
+          ⬇️ Download .itsjust.json
         </button>
         <button
           type="button"
+          className="config-btn config-btn-secondary config-btn-sm"
           onClick={async () => {
             await shareViaWeb({
               toolId: toolConfig.id,
@@ -98,20 +83,9 @@ export default function ToolClient() {
             });
           }}
           disabled={isExporting}
-          style={{
-            padding: "0.375rem 0.75rem",
-            border: "1px solid var(--border)",
-            borderRadius: "var(--radius)",
-            background: "var(--card)",
-            color: "var(--foreground)",
-            cursor: isExporting ? "not-allowed" : "pointer",
-            fontSize: "0.8125rem",
-            fontWeight: 500,
-            fontFamily: "inherit",
-          }}
           aria-disabled={isExporting}
         >
-          Share
+          🔗 Share
         </button>
       </div>
     </>
