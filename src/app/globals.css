@@ -1031,6 +1031,20 @@ body {
   margin-bottom: 0;
 }
 
+.config-empty-message {
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-align: center;
+  padding: 1rem 0;
+  margin: 0;
+}
+
+.config-service-meta {
+  font-size: 0.6875rem;
+  color: var(--muted);
+  margin-top: 0.25rem;
+}
+
 .config-share-actions {
   display: flex;
   gap: 0.5rem;
