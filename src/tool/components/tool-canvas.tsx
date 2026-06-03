@@ -357,17 +357,21 @@ export function ToolCanvas({
   );
 
   const [copyFeedback, setCopyFeedback] = useState(false);
+  const [downloadFeedback, setDownloadFeedback] = useState(false);
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const downloadTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    // Cleanup copy feedback timer on unmount
+    // Cleanup timers on unmount
     return () => {
       if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+      if (downloadTimerRef.current) clearTimeout(downloadTimerRef.current);
     };
   }, []);
 
   const handleCopy = useCallback(() => {
     if (navigator.clipboard) {
+      onCopy?.();
       navigator.clipboard
         .writeText(output)
         .then(() => {
@@ -377,9 +381,10 @@ export function ToolCanvas({
         })
         .catch(() => {});
     }
-  }, [output]);
+  }, [output, onCopy]);
 
   const handleDownload = useCallback(() => {
+    onDownload?.();
     const blob = new Blob([output], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -390,9 +395,12 @@ export function ToolCanvas({
         ? "Dockerfile"
         : `${title.replace(/[^a-zA-Z0-9_-]/g, "_")}.${ext}`;
     a.click();
+    setDownloadFeedback(true);
+    if (downloadTimerRef.current) clearTimeout(downloadTimerRef.current);
+    downloadTimerRef.current = setTimeout(() => setDownloadFeedback(false), 2000);
     // Revoke the URL after a short delay to ensure the download starts
     requestAnimationFrame(() => URL.revokeObjectURL(url));
-  }, [output, type, title]);
+  }, [output, type, title, onDownload]);
 
   const servicesEmpty = services.length === 0;
 
@@ -432,17 +440,21 @@ export function ToolCanvas({
             aria-label="Copy configuration to clipboard"
             aria-live={copyFeedback ? "assertive" : undefined}
             disabled={servicesEmpty}
+            aria-disabled={servicesEmpty}
+            title={servicesEmpty ? "Add a service first" : "Copy to clipboard"}
           >
             {copyFeedback ? "✅ Copied!" : "📋 Copy"}
           </button>
           <button
             type="button"
-            className="config-btn config-btn-secondary config-btn-sm"
+            className={`config-btn config-btn-secondary config-btn-sm ${downloadFeedback ? "config-btn-downloaded" : ""}`}
             onClick={onDownload || handleDownload}
             aria-label="Download configuration file"
             disabled={servicesEmpty}
+            aria-disabled={servicesEmpty}
+            title={servicesEmpty ? "Add a service first" : "Download configuration file"}
           >
-            ⬇️ Download
+            {downloadFeedback ? "✅ Downloaded!" : "⬇️ Download"}
           </button>
         </div>
       </div>

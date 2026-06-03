@@ -1110,6 +1110,16 @@ body {
   background: var(--success-hover);
 }
 
+.config-btn-downloaded {
+  background: var(--accent);
+  color: #fff;
+  border: 1px solid var(--accent);
+}
+
+.config-btn-downloaded:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
 @media print {
   .config-actions {
     display: none !important;

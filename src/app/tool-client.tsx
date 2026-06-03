@@ -31,7 +31,7 @@ export default function ToolClient() {
   const { downloadShareFile, shareViaWeb } = useShare();
 
   const handleExport = useCallback(
-    async (format: "png" | "pdf" | "json" | "jpeg" | "webp") => {
+    async (format: "png" | "pdf" | "json" | "webp") => {
       await exportTo(format);
     },
     [exportTo],
