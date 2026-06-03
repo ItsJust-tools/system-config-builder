@@ -125,7 +125,7 @@ if (toolConfigText) {
     ["id", /id:\s*['"][^'"]+['"]/],
     ["name", /name:\s*['"][^'"]+['"]/],
     ["description", /description:\s*['"][^'"]+['"]/],
-    ["version", /version:\s*['"][^'"]+['"]/],
+    ["version", /version:\s*(['"][^'"]+['"]|[a-zA-Z_$][\w$.]+)/],
     ["exportFormats", /exportFormats:\s*\[/],
     ["features", /features:\s*\{/],
     ["theme", /theme:\s*\{/],

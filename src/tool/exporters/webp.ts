@@ -5,10 +5,15 @@
 
 import type { Exporter } from "@itsjust/core";
 
+function getConfigStateLabel(_stateSerializer?: () => string): string {
+  return _stateSerializer?.() || "unknown";
+}
+
 export const exporter: Exporter = {
   format: "webp",
-  export: async (element, options, _stateSerializer) => {
+  export: async (element, options, stateSerializer) => {
     try {
+      getConfigStateLabel(stateSerializer);
       const { toBlob } = await import("html-to-image");
       const blob = await toBlob(element, {
         width: element.offsetWidth,

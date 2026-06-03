@@ -84,7 +84,7 @@ export function useExport(
     );
   }, [missing]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // Empty array ensures effect only runs on mount
 
   const isExportingRef = useRef(false);
 
