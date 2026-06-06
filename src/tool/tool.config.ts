@@ -9,7 +9,7 @@ const toolConfig = {
   description:
     "Generate system configuration files. Create Docker Compose, systemd units, NGINX configs, WireGuard configs, and more.",
   version: packageJson.version,
-  exportFormats: ["json", "png", "pdf"],
+  exportFormats: ["json", "png", "pdf", "webp"],
   features: {
     export: true,
     autoSave: false,

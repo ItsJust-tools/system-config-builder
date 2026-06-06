@@ -1,93 +1,142 @@
 "use client";
 
-import { useCallback, useRef } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import {
+  ToolShell,
+  useTool,
+  ImportExport,
+} from "@itsjust/core";
+import type { ExportFormat } from "@itsjust/core";
 import {
   configBuilderTool,
   ToolCanvas,
   ToolToolbar,
   ToolSidebar,
 } from "@/tool";
-import type { ConfigType } from "@/tool";
-import { useToolState, useExport, useShare } from "@itsjust/core";
+import type { ConfigType, SystemService } from "@/tool";
 
 export default function ToolClient() {
   const canvasRef = useRef<HTMLDivElement>(null);
-
-  const toolConfig = configBuilderTool.config;
-
-  const state = useToolState<typeof configBuilderTool.initialState>(
-    configBuilderTool.initialState,
-    {
-      key: "system-config-builder",
-      maxHistoryEntries: 100,
-      debounceMs: 0,
-    },
+  const tool = useTool(configBuilderTool, canvasRef);
+  const setToolData = tool.state.setData;
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(
+    () =>
+      typeof window !== "undefined" &&
+      window.innerWidth > 768 &&
+      configBuilderTool.config.features.sidebar,
   );
 
-  const { exportTo, isExporting } = useExport(canvasRef, toolConfig, () =>
-    configBuilderTool.serialize(state.data),
+  // --- Service management callbacks ---
+  const addService = useCallback(() => {
+    const name = `service-${Date.now()}`;
+    const newService: SystemService = {
+      name,
+      image: "nginx:alpine",
+      ports: [80],
+    };
+    setToolData((prev) => ({
+      ...prev,
+      services: [...prev.services, newService],
+    }));
+  }, [setToolData]);
+
+  const removeService = useCallback(
+    (index: number) => {
+      setToolData((prev) => ({
+        ...prev,
+        services: prev.services.filter((_, i) => i !== index),
+      }));
+    },
+    [setToolData],
   );
 
-  const { downloadShareFile, shareViaWeb } = useShare();
-
-  const handleExport = useCallback(
-    async (format: "png" | "pdf" | "json" | "webp") => {
-      await exportTo(format);
+  const updateService = useCallback(
+    (index: number, service: SystemService) => {
+      setToolData((prev) => {
+        const services = [...prev.services];
+        services[index] = service;
+        return { ...prev, services };
+      });
     },
-    [exportTo],
+    [setToolData],
+  );
+
+  // --- Title editing ---
+  const updateTitle = useCallback(
+    (title: string) => {
+      setToolData((prev) => ({ ...prev, title }));
+    },
+    [setToolData],
+  );
+
+  const updateType = useCallback(
+    (type: string) => {
+      setToolData((prev) => ({ ...prev, type: type as ConfigType }));
+    },
+    [setToolData],
+  );
+
+  const updateNetwork = useCallback(
+    (network: string) => {
+      setToolData((prev) => ({ ...prev, network }));
+    },
+    [setToolData],
+  );
+
+  const updateVolumeDriver = useCallback(
+    (volumeDriver: string) => {
+      setToolData((prev) => ({ ...prev, volumeDriver }));
+    },
+    [setToolData],
+  );
+
+  // --- Build toolbar actions ---
+  const toolbarActions = useMemo(
+    () => ({
+      ...tool.toolbarActions,
+      onExport: tool.handleExport,
+      supportedFormats: tool.supportedFormats,
+    }),
+    [tool.toolbarActions, tool.handleExport, tool.supportedFormats],
   );
 
   return (
     <>
-      <ToolToolbar
-        type={state.data.type}
-        onTypeChange={(type) =>
-          state.setData((prev) => ({ ...prev, type: type as ConfigType }))
+      <ToolShell
+        config={configBuilderTool.config}
+        actions={toolbarActions}
+        toolbar={
+          <ToolToolbar
+            type={tool.state.data.type}
+            onTypeChange={updateType}
+          />
         }
-        onExport={() => handleExport("json")}
-      />
-      <ToolCanvas
-        title={state.data.title}
-        services={state.data.services}
-        network={state.data.network}
-        volumeDriver={state.data.volumeDriver}
-        type={state.data.type}
-        canvasRef={canvasRef}
-      />
-      <ToolSidebar title={state.data.title} services={state.data.services} />
-      {/* Share Actions */}
-      <div className="config-share-actions">
-        <button
-          type="button"
-          className="config-btn config-btn-secondary config-btn-sm"
-          onClick={async () => {
-            await downloadShareFile({
-              toolId: toolConfig.id,
-              content: configBuilderTool.serialize(state.data),
-              metadata: { schemaVersion: "1.0" },
-            });
-          }}
-          disabled={isExporting}
-          aria-disabled={isExporting}
-        >
-          ⬇️ Download .itsjust.json
-        </button>
-        <button
-          type="button"
-          className="config-btn config-btn-secondary config-btn-sm"
-          onClick={async () => {
-            await shareViaWeb({
-              toolId: toolConfig.id,
-              content: configBuilderTool.serialize(state.data),
-              metadata: { schemaVersion: "1.0" },
-            });
-          }}
-          disabled={isExporting}
-          aria-disabled={isExporting}
-        >
-          🔗 Share
-        </button>
-      </div>
+        sidebar={
+          <ToolSidebar
+            title={tool.state.data.title}
+            services={tool.state.data.services}
+            network={tool.state.data.network}
+            volumeDriver={tool.state.data.volumeDriver}
+            onAddService={addService}
+            onRemoveService={removeService}
+            onUpdateService={updateService}
+            onUpdateTitle={updateTitle}
+            onUpdateNetwork={updateNetwork}
+            onUpdateVolumeDriver={updateVolumeDriver}
+          />
+        }
+        sidebarOpen={sidebarOpen}
+        onToggleSidebar={() => setSidebarOpen((v) => !v)}
+      >
+        <ToolCanvas
+          title={tool.state.data.title}
+          services={tool.state.data.services}
+          network={tool.state.data.network}
+          volumeDriver={tool.state.data.volumeDriver}
+          type={tool.state.data.type}
+          canvasRef={canvasRef}
+        />
+      </ToolShell>
     </>
   );
 }

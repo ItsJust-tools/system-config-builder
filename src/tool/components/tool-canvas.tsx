@@ -395,7 +395,6 @@ export function ToolCanvas({
 
   const handleCopy = useCallback(() => {
     if (navigator.clipboard) {
-      onCopy?.();
       navigator.clipboard
         .writeText(output)
         .then(() => {
@@ -405,10 +404,9 @@ export function ToolCanvas({
         })
         .catch(() => {});
     }
-  }, [output, onCopy]);
+  }, [output]);
 
   const handleDownload = useCallback(() => {
-    onDownload?.();
     const blob = new Blob([output], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -421,10 +419,11 @@ export function ToolCanvas({
     a.click();
     setDownloadFeedback(true);
     if (downloadTimerRef.current) clearTimeout(downloadTimerRef.current);
-    downloadTimerRef.current = setTimeout(() => setDownloadFeedback(false), 2000);
-    // Revoke the URL after a short delay to ensure the download starts
-    requestAnimationFrame(() => URL.revokeObjectURL(url));
-  }, [output, type, title, onDownload]);
+    downloadTimerRef.current = setTimeout(() => {
+      setDownloadFeedback(false);
+      URL.revokeObjectURL(url);
+    }, 3000);
+  }, [output, type, title]);
 
   const servicesEmpty = services.length === 0;
 

@@ -3,13 +3,11 @@
 interface ToolToolbarProps {
   type: string;
   onTypeChange?: (type: string) => void;
-  onExport?: () => void;
 }
 
 export function ToolToolbar({
   type,
   onTypeChange,
-  onExport,
 }: ToolToolbarProps) {
   return (
     <div className="config-toolbar-inner">
@@ -29,16 +27,6 @@ export function ToolToolbar({
         <option value="supervisor">Supervisor</option>
         <option value="traefik">Traefik</option>
       </select>
-
-      {/* Export Button */}
-      <button
-        type="button"
-        className="config-btn config-btn-secondary config-btn-sm"
-        onClick={onExport}
-        aria-label="Export configuration"
-      >
-        Download Config
-      </button>
     </div>
   );
 }
