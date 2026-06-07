@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { configBuilderTool } from '@/tool/tool-definition';
-import type { SystemConfigState, SystemService, ConfigType } from '@/tool/types';
+import type { SystemConfigState } from '@/tool/types';
 
 const defaultState: SystemConfigState = {
   type: 'docker-compose',

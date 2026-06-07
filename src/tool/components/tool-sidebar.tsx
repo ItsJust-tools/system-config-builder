@@ -18,12 +18,10 @@ interface ToolSidebarProps {
 
 function ServiceCard({
   service,
-  index,
   onRemove,
   onUpdate,
 }: {
   service: SystemService;
-  index: number;
   onRemove: () => void;
   onUpdate: (service: SystemService) => void;
 }) {
@@ -34,18 +32,75 @@ function ServiceCard({
     service.ports?.join(", ") ?? "",
   );
   const [editRestart, setEditRestart] = useState(service.restart ?? "");
+  const [editVolumes, setEditVolumes] = useState(
+    service.volumes?.join(", ") ?? "",
+  );
+  const [editEnv, setEditEnv] = useState(
+    service.environment
+      ? Object.entries(service.environment)
+          .map(([k, v]) => `${k}=${v}`)
+          .join("\n")
+      : "",
+  );
+  const [editDependsOn, setEditDependsOn] = useState(
+    service.dependsOn?.join(", ") ?? "",
+  );
 
   const handleSave = useCallback(() => {
+    // Parse ports: support both plain numbers and "host:container" string format
+    const parsedPorts = editPorts
+      ? editPorts
+          .split(",")
+          .map((p) => p.trim())
+          .filter((p) => p.length > 0)
+          .map((p) => {
+            // If it's a "host:container" format, keep as string
+            if (p.includes(":")) return p;
+            const num = parseInt(p, 10);
+            return isNaN(num) ? p : num;
+          })
+      : undefined;
+
+    // Parse environment variables (KEY=VALUE per line or comma-separated)
+    let parsedEnv: Record<string, string> | undefined;
+    const envLines = editEnv
+      .split(/[\n,]/)
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0 && l.includes("="));
+    if (envLines.length > 0) {
+      parsedEnv = {};
+      for (const line of envLines) {
+        const eqIdx = line.indexOf("=");
+        const key = line.substring(0, eqIdx).trim();
+        const val = line.substring(eqIdx + 1).trim();
+        if (key) parsedEnv[key] = val;
+      }
+    }
+
+    // Parse volumes (comma-separated)
+    const parsedVolumes = editVolumes
+      ? editVolumes
+          .split(",")
+          .map((v) => v.trim())
+          .filter((v) => v.length > 0)
+      : undefined;
+
+    // Parse depends_on (comma-separated)
+    const parsedDependsOn = editDependsOn
+      ? editDependsOn
+          .split(",")
+          .map((d) => d.trim())
+          .filter((d) => d.length > 0)
+      : undefined;
+
     onUpdate({
       ...service,
       name: editName.trim() || service.name,
       image: editImage.trim() || service.image,
-      ports: editPorts
-        ? editPorts
-            .split(",")
-            .map((p) => parseInt(p.trim(), 10))
-            .filter((n) => !isNaN(n))
-        : undefined,
+      ports: parsedPorts,
+      volumes: parsedVolumes,
+      environment: parsedEnv,
+      dependsOn: parsedDependsOn,
       restart: editRestart.trim() || undefined,
     });
     setEditing(false);
@@ -55,6 +110,9 @@ function ServiceCard({
     editImage,
     editPorts,
     editRestart,
+    editVolumes,
+    editEnv,
+    editDependsOn,
     onUpdate,
   ]);
 
@@ -83,13 +141,13 @@ function ServiceCard({
             />
           </label>
           <label className="config-edit-label">
-            Ports (comma-separated)
+            Ports (comma-separated, e.g. 80, 443 or 8080:80)
             <input
               type="text"
               value={editPorts}
               onChange={(e) => setEditPorts(e.target.value)}
               className="config-edit-input"
-              placeholder="80, 443"
+              placeholder="80, 443, 8080:80"
               aria-label="Service ports"
             />
           </label>
@@ -107,6 +165,40 @@ function ServiceCard({
               <option value="unless-stopped">Unless Stopped</option>
               <option value="no">No</option>
             </select>
+          </label>
+          <label className="config-edit-label">
+            Volumes (comma-separated, e.g. ./data:/data)
+            <input
+              type="text"
+              value={editVolumes}
+              onChange={(e) => setEditVolumes(e.target.value)}
+              className="config-edit-input"
+              placeholder="./data:/data, pgdata:/var/lib/postgresql/data"
+              aria-label="Service volumes"
+            />
+          </label>
+          <label className="config-edit-label">
+            Environment variables (KEY=VALUE, one per line)
+            <textarea
+              value={editEnv}
+              onChange={(e) => setEditEnv(e.target.value)}
+              className="config-edit-textarea"
+              placeholder="NODE_ENV=production
+DATABASE_URL=postgres://user:pass@db:5432/app"
+              rows={3}
+              aria-label="Environment variables"
+            />
+          </label>
+          <label className="config-edit-label">
+            Depends on (comma-separated service names)
+            <input
+              type="text"
+              value={editDependsOn}
+              onChange={(e) => setEditDependsOn(e.target.value)}
+              className="config-edit-input"
+              placeholder="db, redis"
+              aria-label="Service dependencies"
+            />
           </label>
           <div className="config-edit-actions">
             <button
@@ -144,6 +236,15 @@ function ServiceCard({
               setEditImage(service.image);
               setEditPorts(service.ports?.join(", ") ?? "");
               setEditRestart(service.restart ?? "");
+              setEditVolumes(service.volumes?.join(", ") ?? "");
+              setEditEnv(
+                service.environment
+                  ? Object.entries(service.environment)
+                      .map(([k, v]) => `${k}=${v}`)
+                      .join("\n")
+                  : "",
+              );
+              setEditDependsOn(service.dependsOn?.join(", ") ?? "");
               setEditing(true);
             }}
             aria-label={`Edit service ${service.name}`}
@@ -171,6 +272,16 @@ function ServiceCard({
       {service.volumes && service.volumes.length > 0 && (
         <div className="config-service-meta">
           Volumes: {service.volumes.length}
+        </div>
+      )}
+      {service.environment && Object.keys(service.environment).length > 0 && (
+        <div className="config-service-meta">
+          Env vars: {Object.keys(service.environment).length}
+        </div>
+      )}
+      {service.dependsOn && service.dependsOn.length > 0 && (
+        <div className="config-service-meta">
+          Depends on: {service.dependsOn.join(", ")}
         </div>
       )}
       {service.restart && (

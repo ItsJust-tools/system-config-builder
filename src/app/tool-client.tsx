@@ -4,9 +4,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import {
   ToolShell,
   useTool,
-  ImportExport,
 } from "@itsjust/core";
-import type { ExportFormat } from "@itsjust/core";
 import {
   configBuilderTool,
   ToolCanvas,
@@ -126,17 +124,18 @@ export default function ToolClient() {
           />
         }
         sidebarOpen={sidebarOpen}
-        onToggleSidebar={() => setSidebarOpen((v) => !v)}
-      >
-        <ToolCanvas
-          title={tool.state.data.title}
-          services={tool.state.data.services}
-          network={tool.state.data.network}
-          volumeDriver={tool.state.data.volumeDriver}
-          type={tool.state.data.type}
-          canvasRef={canvasRef}
-        />
-      </ToolShell>
+        onSidebarChange={(open) => setSidebarOpen(open)}
+        canvas={
+          <ToolCanvas
+            title={tool.state.data.title}
+            services={tool.state.data.services}
+            network={tool.state.data.network}
+            volumeDriver={tool.state.data.volumeDriver}
+            type={tool.state.data.type}
+            canvasRef={canvasRef}
+          />
+        }
+      />
     </>
   );
 }

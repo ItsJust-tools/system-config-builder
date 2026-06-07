@@ -1235,6 +1235,23 @@ body {
   outline: none;
 }
 
+.config-edit-textarea {
+  padding: 0.25rem 0.375rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--card);
+  color: var(--foreground);
+  font-size: 0.75rem;
+  font-family: ui-monospace, Menlo, Monaco, "Cascadia Code", "Segoe UI Mono", monospace;
+  resize: vertical;
+  min-height: 3.5rem;
+}
+
+.config-edit-textarea:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
 .config-edit-select {
   padding: 0.25rem 0.375rem;
   border: 1px solid var(--border);

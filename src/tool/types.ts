@@ -10,7 +10,7 @@ export type ConfigType =
 export interface SystemService {
   name: string;
   image: string;
-  ports?: number[];
+  ports?: (number | string)[];
   volumes?: string[];
   environment?: Record<string, string>;
   dependsOn?: string[];
