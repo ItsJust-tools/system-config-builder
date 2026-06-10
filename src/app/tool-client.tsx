@@ -74,6 +74,20 @@ export default function ToolClient() {
     [setToolData],
   );
 
+  const updateDescription = useCallback(
+    (description: string) => {
+      setToolData((prev) => ({ ...prev, description }));
+    },
+    [setToolData],
+  );
+
+  const updateNotes = useCallback(
+    (notes: string) => {
+      setToolData((prev) => ({ ...prev, notes }));
+    },
+    [setToolData],
+  );
+
   const updateNetwork = useCallback(
     (network: string) => {
       setToolData((prev) => ({ ...prev, network }));
@@ -112,6 +126,8 @@ export default function ToolClient() {
         sidebar={
           <ToolSidebar
             title={tool.state.data.title}
+            description={tool.state.data.description}
+            notes={tool.state.data.notes}
             services={tool.state.data.services}
             network={tool.state.data.network}
             volumeDriver={tool.state.data.volumeDriver}
@@ -119,6 +135,8 @@ export default function ToolClient() {
             onRemoveService={removeService}
             onUpdateService={updateService}
             onUpdateTitle={updateTitle}
+            onUpdateDescription={updateDescription}
+            onUpdateNotes={updateNotes}
             onUpdateNetwork={updateNetwork}
             onUpdateVolumeDriver={updateVolumeDriver}
           />

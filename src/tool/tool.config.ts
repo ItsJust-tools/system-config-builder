@@ -34,6 +34,16 @@ const toolConfig = {
           label: "Export",
           description: "export current config as JSON",
         },
+        {
+          keys: "Ctrl+Shift+C",
+          label: "Copy",
+          description: "copy configuration to clipboard",
+        },
+        {
+          keys: "Ctrl+Shift+D",
+          label: "Download",
+          description: "download configuration file",
+        },
       ],
     },
   ],

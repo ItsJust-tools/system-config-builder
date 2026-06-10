@@ -91,6 +91,17 @@ function generateDockerCompose(
       lines.push(`    restart: ${s.restart}`);
     }
 
+    if (s.containerName) {
+      lines.push(`    container_name: ${s.containerName}`);
+    }
+
+    if (s.labels && Object.keys(s.labels).length > 0) {
+      lines.push("    labels:");
+      for (const [key, val] of Object.entries(s.labels)) {
+        lines.push(`      ${key}: "${val}"`);
+      }
+    }
+
     lines.push("");
   }
 
@@ -375,7 +386,7 @@ function getFileExtension(configType: string): string {
     case "supervisor":
       return "ini";
     case "traefik":
-      return "toml";
+      return "yml";
     default:
       return "txt";
   }

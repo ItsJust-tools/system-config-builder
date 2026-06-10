@@ -2,9 +2,12 @@
 
 import { useState, useCallback } from "react";
 import type { SystemService } from "../types";
+import { configTypeLabels } from "../types";
 
 interface ToolSidebarProps {
   title: string;
+  description: string;
+  notes: string;
   services: SystemService[];
   network: string;
   volumeDriver: string;
@@ -12,6 +15,8 @@ interface ToolSidebarProps {
   onRemoveService: (index: number) => void;
   onUpdateService: (index: number, service: SystemService) => void;
   onUpdateTitle: (title: string) => void;
+  onUpdateDescription: (description: string) => void;
+  onUpdateNotes: (notes: string) => void;
   onUpdateNetwork: (network: string) => void;
   onUpdateVolumeDriver: (volumeDriver: string) => void;
 }
@@ -44,6 +49,16 @@ function ServiceCard({
   );
   const [editDependsOn, setEditDependsOn] = useState(
     service.dependsOn?.join(", ") ?? "",
+  );
+  const [editContainerName, setEditContainerName] = useState(
+    service.containerName ?? "",
+  );
+  const [editLabels, setEditLabels] = useState(
+    service.labels
+      ? Object.entries(service.labels)
+          .map(([k, v]) => `${k}=${v}`)
+          .join("\n")
+      : "",
   );
 
   const handleSave = useCallback(() => {
@@ -93,6 +108,22 @@ function ServiceCard({
           .filter((d) => d.length > 0)
       : undefined;
 
+    // Parse labels (KEY=VALUE per line)
+    let parsedLabels: Record<string, string> | undefined;
+    const labelLines = editLabels
+      .split(/[\n,]/)
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0 && l.includes("="));
+    if (labelLines.length > 0) {
+      parsedLabels = {};
+      for (const line of labelLines) {
+        const eqIdx = line.indexOf("=");
+        const key = line.substring(0, eqIdx).trim();
+        const val = line.substring(eqIdx + 1).trim();
+        if (key) parsedLabels[key] = val;
+      }
+    }
+
     onUpdate({
       ...service,
       name: editName.trim() || service.name,
@@ -102,6 +133,8 @@ function ServiceCard({
       environment: parsedEnv,
       dependsOn: parsedDependsOn,
       restart: editRestart.trim() || undefined,
+      containerName: editContainerName.trim() || undefined,
+      labels: parsedLabels,
     });
     setEditing(false);
   }, [
@@ -200,6 +233,28 @@ DATABASE_URL=postgres://user:pass@db:5432/app"
               aria-label="Service dependencies"
             />
           </label>
+          <label className="config-edit-label">
+            Container name
+            <input
+              type="text"
+              value={editContainerName}
+              onChange={(e) => setEditContainerName(e.target.value)}
+              className="config-edit-input"
+              placeholder="my-app-container"
+              aria-label="Container name"
+            />
+          </label>
+          <label className="config-edit-label">
+            Labels (KEY=VALUE, one per line)
+            <textarea
+              value={editLabels}
+              onChange={(e) => setEditLabels(e.target.value)}
+              className="config-edit-textarea"
+              placeholder={'com.example.vendor=\"ACME\"\ncom.example.version=\"1.0\"'}
+              rows={2}
+              aria-label="Container labels"
+            />
+          </label>
           <div className="config-edit-actions">
             <button
               type="button"
@@ -245,6 +300,14 @@ DATABASE_URL=postgres://user:pass@db:5432/app"
                   : "",
               );
               setEditDependsOn(service.dependsOn?.join(", ") ?? "");
+              setEditContainerName(service.containerName ?? "");
+              setEditLabels(
+                service.labels
+                  ? Object.entries(service.labels)
+                      .map(([k, v]) => `${k}=${v}`)
+                      .join("\n")
+                  : "",
+              );
               setEditing(true);
             }}
             aria-label={`Edit service ${service.name}`}
@@ -289,12 +352,24 @@ DATABASE_URL=postgres://user:pass@db:5432/app"
           Restart: {service.restart}
         </div>
       )}
+      {service.containerName && (
+        <div className="config-service-meta">
+          Container: {service.containerName}
+        </div>
+      )}
+      {service.labels && Object.keys(service.labels).length > 0 && (
+        <div className="config-service-meta">
+          Labels: {Object.keys(service.labels).length}
+        </div>
+      )}
     </div>
   );
 }
 
 export function ToolSidebar({
   title,
+  description,
+  notes,
   services,
   network,
   volumeDriver,
@@ -302,6 +377,8 @@ export function ToolSidebar({
   onRemoveService,
   onUpdateService,
   onUpdateTitle,
+  onUpdateDescription,
+  onUpdateNotes,
   onUpdateNetwork,
   onUpdateVolumeDriver,
 }: ToolSidebarProps) {
@@ -326,6 +403,34 @@ export function ToolSidebar({
               {services.length !== 1 ? "s" : ""}
             </span>
           </div>
+        </div>
+        <div className="config-sidebar-field">
+          <label className="config-sidebar-label" htmlFor="sidebar-description">
+            Description
+          </label>
+          <input
+            id="sidebar-description"
+            type="text"
+            value={description}
+            onChange={(e) => onUpdateDescription(e.target.value)}
+            className="config-edit-input"
+            placeholder="My application stack"
+            aria-label="Application description"
+          />
+        </div>
+        <div className="config-sidebar-field">
+          <label className="config-sidebar-label" htmlFor="sidebar-notes">
+            Notes
+          </label>
+          <textarea
+            id="sidebar-notes"
+            value={notes}
+            onChange={(e) => onUpdateNotes(e.target.value)}
+            className="config-edit-textarea"
+            placeholder="Optional notes about this configuration"
+            rows={2}
+            aria-label="Configuration notes"
+          />
         </div>
       </div>
 
@@ -394,7 +499,6 @@ export function ToolSidebar({
               <ServiceCard
                 key={`${s.name}-${i}`}
                 service={s}
-                index={i}
                 onRemove={() => onRemoveService(i)}
                 onUpdate={(updated) => onUpdateService(i, updated)}
               />

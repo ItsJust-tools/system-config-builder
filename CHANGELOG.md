@@ -5,6 +5,19 @@ All notable changes to the System Config Builder will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-06-10
+
+### Added
+
+- Container name field in service editor sidebar
+- Docker labels support (KEY=VALUE per line) in service editor
+- Description and Notes fields in sidebar (were missing from UI)
+- `Ctrl+Shift+C` and `Ctrl+Shift+D` keyboard shortcuts registered in tool config
+
+### Fixed
+
+- Traefik file extension changed from `.toml` to `.yml` (the config is YAML, not TOML)
+
 ## [1.1.0] - 2026-06-06
 
 ### Added

@@ -15,6 +15,8 @@ export interface SystemService {
   environment?: Record<string, string>;
   dependsOn?: string[];
   restart?: string;
+  containerName?: string;
+  labels?: Record<string, string>;
 }
 
 export interface SystemConfigState {
