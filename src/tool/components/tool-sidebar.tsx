@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import type { SystemService } from "../types";
 import { configTypeLabels } from "../types";
 
+/** Props for the full sidebar including app-level settings and service list. */
 interface ToolSidebarProps {
   title: string;
   description: string;
@@ -21,6 +22,7 @@ interface ToolSidebarProps {
   onUpdateVolumeDriver: (volumeDriver: string) => void;
 }
 
+/** Inline props for a single service card with editing and removal controls. */
 function ServiceCard({
   service,
   onRemove,
@@ -366,6 +368,8 @@ DATABASE_URL=postgres://user:pass@db:5432/app"
   );
 }
 
+ServiceCard.displayName = "ServiceCard";
+
 export function ToolSidebar({
   title,
   description,
@@ -521,3 +525,5 @@ export function ToolSidebar({
     </div>
   );
 }
+
+ToolSidebar.displayName = "ToolSidebar";

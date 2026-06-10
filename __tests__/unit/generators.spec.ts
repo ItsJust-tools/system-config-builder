@@ -155,7 +155,7 @@ describe("Config generators", () => {
         case "supervisor":
           return "ini";
         case "traefik":
-          return "toml";
+          return "yml";
         default:
           return "txt";
       }
@@ -185,8 +185,8 @@ describe("Config generators", () => {
       expect(getFileExtension("supervisor")).toBe("ini");
     });
 
-    it("should map traefik to toml", () => {
-      expect(getFileExtension("traefik")).toBe("toml");
+    it("should map traefik to yml", () => {
+      expect(getFileExtension("traefik")).toBe("yml");
     });
 
     it("should map unknown types to txt", () => {

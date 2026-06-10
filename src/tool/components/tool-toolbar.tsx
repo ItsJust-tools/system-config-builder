@@ -1,5 +1,6 @@
 "use client";
 
+/** Props for the config-type toolbar selector. */
 interface ToolToolbarProps {
   type: string;
   onTypeChange?: (type: string) => void;
@@ -30,3 +31,5 @@ export function ToolToolbar({
     </div>
   );
 }
+
+ToolToolbar.displayName = "ToolToolbar";

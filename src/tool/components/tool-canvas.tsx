@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { SystemService } from "../types";
 import { configTypeLabels } from "../types";
 
+/** Props for the ToolCanvas component. */
 interface ToolCanvasProps {
   title: string;
   services: SystemService[];
@@ -15,9 +16,7 @@ interface ToolCanvasProps {
   onDownload?: () => void;
 }
 
-/**
- * Generates a Docker Compose YAML configuration string from the given parameters.
- */
+/** Generate Docker Compose YAML from service definitions. */
 function generateDockerCompose(
   title: string,
   services: SystemService[],
@@ -126,9 +125,7 @@ function generateDockerCompose(
   return lines.join("\n");
 }
 
-/**
- * Generates a modern Dockerfile template with multi-stage build for smaller images.
- */
+/** Generate a multi-stage Dockerfile for Node.js 22 Alpine. */
 function generateDockerfile(title: string): string {
   return [
     `# ${title} — Dockerfile`,
@@ -163,9 +160,7 @@ function generateDockerfile(title: string): string {
   ].join("\n");
 }
 
-/**
- * Generates a systemd unit file template.
- */
+/** Generate a systemd unit file for containerized apps. */
 function generateSystemd(title: string): string {
   return [
     `# ${title} — systemd Unit`,
@@ -191,9 +186,7 @@ function generateSystemd(title: string): string {
   ].join("\n");
 }
 
-/**
- * Generates an NGINX configuration with proxy pass for the first defined service.
- */
+/** Generate an NGINX virtual host config with proxy pass for the primary service. */
 function generateNginx(title: string, services: SystemService[]): string {
   const lines: string[] = [
     `# ${title} — NGINX Configuration`,
@@ -238,9 +231,7 @@ function generateNginx(title: string, services: SystemService[]): string {
   return lines.join("\n");
 }
 
-/**
- * Generates a WireGuard VPN configuration template.
- */
+/** Generate a WireGuard VPN peer configuration template. */
 function generateWireguard(title: string): string {
   return [
     `# ${title} — WireGuard Configuration`,
@@ -265,9 +256,7 @@ function generateWireguard(title: string): string {
   ].join("\n");
 }
 
-/**
- * Generates a Supervisor program configuration for each defined service.
- */
+/** Generate Supervisor config with one program per service. */
 function generateSupervisor(title: string, services: SystemService[]): string {
   const lines: string[] = [
     `; ${title} — Supervisor Configuration`,
@@ -296,10 +285,7 @@ function generateSupervisor(title: string, services: SystemService[]): string {
   return lines.join("\n");
 }
 
-/**
- * Generates a Traefik reverse proxy configuration (YAML — modern format)
- * for each defined service.
- */
+/** Generate Traefik dynamic YAML config with routers and load-balancer services. */
 function generateTraefik(title: string, services: SystemService[]): string {
   const lines: string[] = [
     `# ${title} — Traefik Dynamic Configuration`,
@@ -344,6 +330,7 @@ function generateTraefik(title: string, services: SystemService[]): string {
   return lines.join("\n");
 }
 
+/** Route config type to the appropriate generator function. */
 function generateConfig(
   type: string,
   title: string,
@@ -371,6 +358,7 @@ function generateConfig(
   }
 }
 
+/** Map config type to the correct file extension for downloads. */
 function getFileExtension(configType: string): string {
   switch (configType) {
     case "docker-compose":
@@ -515,3 +503,5 @@ export function ToolCanvas({
     </div>
   );
 }
+
+ToolCanvas.displayName = "ToolCanvas";
