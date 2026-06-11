@@ -6,6 +6,13 @@ interface ToolToolbarProps {
   onTypeChange?: (type: string) => void;
 }
 
+/**
+ * ToolToolbar renders the config-type selector and keyboard shortcut hints.
+ *
+ * @param props - Component props
+ * @param props.type - Current configuration type
+ * @param props.onTypeChange - Callback when the config type changes
+ */
 export function ToolToolbar({
   type,
   onTypeChange,
@@ -28,6 +35,17 @@ export function ToolToolbar({
         <option value="supervisor">Supervisor</option>
         <option value="traefik">Traefik</option>
       </select>
+
+      <span className="config-toolbar-separator" aria-hidden="true" />
+
+      {/* Shortcut hints */}
+      <span className="config-toolbar-label config-toolbar-label-secondary">
+        Shortcuts:
+      </span>
+      <kbd className="config-toolbar-kbd">Ctrl+Shift+C</kbd>
+      <span className="config-toolbar-label config-toolbar-label-sm">Copy</span>
+      <kbd className="config-toolbar-kbd">Ctrl+Shift+D</kbd>
+      <span className="config-toolbar-label config-toolbar-label-sm">Download</span>
     </div>
   );
 }

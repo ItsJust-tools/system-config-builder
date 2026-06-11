@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from "react";
 import type { SystemService } from "../types";
-import { configTypeLabels } from "../types";
 
 /** Props for the full sidebar including app-level settings and service list. */
 interface ToolSidebarProps {
@@ -148,6 +147,8 @@ function ServiceCard({
     editVolumes,
     editEnv,
     editDependsOn,
+    editContainerName,
+    editLabels,
     onUpdate,
   ]);
 

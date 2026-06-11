@@ -330,7 +330,16 @@ function generateTraefik(title: string, services: SystemService[]): string {
   return lines.join("\n");
 }
 
-/** Route config type to the appropriate generator function. */
+/**
+ * Route config type to the appropriate generator function.
+ *
+ * @param type - The configuration type key
+ * @param title - Application title for comment headers
+ * @param services - Array of service definitions
+ * @param network - Docker network name
+ * @param volumeDriver - Docker volume driver
+ * @returns Generated configuration text
+ */
 function generateConfig(
   type: string,
   title: string,
@@ -358,7 +367,12 @@ function generateConfig(
   }
 }
 
-/** Map config type to the correct file extension for downloads. */
+/**
+ * Map config type to the correct file extension for downloads.
+ *
+ * @param configType - The configuration type key
+ * @returns File extension string (without leading dot)
+ */
 function getFileExtension(configType: string): string {
   switch (configType) {
     case "docker-compose":
