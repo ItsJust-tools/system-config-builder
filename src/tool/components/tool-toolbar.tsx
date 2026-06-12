@@ -1,5 +1,7 @@
 "use client";
 
+import { configTypeLabels, type ConfigType } from "../types";
+
 /** Props for the config-type toolbar selector. */
 interface ToolToolbarProps {
   type: string;
@@ -8,6 +10,8 @@ interface ToolToolbarProps {
 
 /**
  * ToolToolbar renders the config-type selector and keyboard shortcut hints.
+ * Options are sourced from the shared `configTypeLabels` mapping to keep
+ * labels consistent across the application.
  *
  * @param props - Component props
  * @param props.type - Current configuration type
@@ -17,6 +21,8 @@ export function ToolToolbar({
   type,
   onTypeChange,
 }: ToolToolbarProps) {
+  const configOptions = Object.entries(configTypeLabels) as [ConfigType, string][];
+
   return (
     <div className="config-toolbar-inner">
       {/* Type Selector */}
@@ -27,13 +33,11 @@ export function ToolToolbar({
         className="config-toolbar-select"
         aria-label="Select config type"
       >
-        <option value="docker-compose">Docker Compose</option>
-        <option value="dockerfile">Dockerfile</option>
-        <option value="systemd">Systemd Unit</option>
-        <option value="nginx">NGINX Config</option>
-        <option value="wireguard">WireGuard</option>
-        <option value="supervisor">Supervisor</option>
-        <option value="traefik">Traefik</option>
+        {configOptions.map(([value, label]) => (
+          <option key={value} value={value}>
+            {label}
+          </option>
+        ))}
       </select>
 
       <span className="config-toolbar-separator" aria-hidden="true" />

@@ -186,7 +186,9 @@ function generateSystemd(title: string): string {
   ].join("\n");
 }
 
-/** Generate an NGINX virtual host config with proxy pass for the primary service. */
+/** Generate an NGINX virtual host config with proxy pass for the primary service.
+ * Handles HTTP (port 80) and HTTPS (port 443) detection from service ports.
+ * Uses the primary service's first port for proxy_pass. */
 function generateNginx(title: string, services: SystemService[]): string {
   const lines: string[] = [
     `# ${title} — NGINX Configuration`,
@@ -197,34 +199,61 @@ function generateNginx(title: string, services: SystemService[]): string {
   const primaryService = services[0];
 
   if (primaryService) {
-    const port = primaryService.ports?.[0] || 80;
-    lines.push("server {");
-    lines.push("    listen 80;");
-    lines.push(`    server_name ${title}.example.com;`);
-    lines.push("");
-    lines.push("    location / {");
-    lines.push(`        proxy_pass http://localhost:${port};`);
-    lines.push("        proxy_set_header Host $host;");
-    lines.push("        proxy_set_header X-Real-IP $remote_addr;");
-    lines.push(
-      "        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;",
-    );
-    lines.push("        proxy_set_header X-Forwarded-Proto $scheme;");
-    lines.push("    }");
-    lines.push("");
-    lines.push("    location /static/ {");
-    lines.push("        alias /var/www/static/;");
-    lines.push("        expires 30d;");
-    lines.push("    }");
-    lines.push("}");
+    const rawPort = primaryService.ports?.[0] || 80;
+    // Extract the container port from "host:container" syntax
+    const port =
+      typeof rawPort === "string" && rawPort.includes(":")
+        ? parseInt(rawPort.split(":").pop()!, 10) || 80
+        : Number(rawPort) || 80;
+    const hasHttps = primaryService.ports?.some((p) => {
+      const pNum =
+        typeof p === "string" && p.includes(":")
+          ? parseInt(p.split(":").pop()!, 10)
+          : Number(p);
+      return pNum === 443;
+    });
+
+    if (hasHttps) {
+      lines.push("server {", "    listen 443 ssl;", `    server_name ${title}.example.com;`, "", "    ssl_certificate /etc/ssl/certs/example.com.pem;", "    ssl_certificate_key /etc/ssl/private/example.com.key;", "", "    location / {", `        proxy_pass http://localhost:${port};`,"        proxy_set_header Host $host;",
+        "        proxy_set_header X-Real-IP $remote_addr;",
+        "        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;",
+        "        proxy_set_header X-Forwarded-Proto $scheme;",
+        "    }",
+        "",
+        "    location /static/ {",
+        "        alias /var/www/static/;",
+        "        expires 30d;",
+        "    }",
+        "}",
+        "",
+        "# HTTP redirect to HTTPS",
+        "server {",
+        "    listen 80;",
+        `    server_name ${title}.example.com;`,
+        "",
+        "    return 301 https://$server_name$request_uri;",
+        "}",
+      );
+    } else {
+      lines.push("server {", "    listen 80;",
+        `    server_name ${title}.example.com;`,
+        "",
+        "    location / {",
+        `        proxy_pass http://localhost:${port};`,
+        "        proxy_set_header Host $host;",
+        "        proxy_set_header X-Real-IP $remote_addr;",
+        "        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;",
+        "        proxy_set_header X-Forwarded-Proto $scheme;",
+        "    }",
+        "",
+        "    location /static/ {",
+        "        alias /var/www/static/;",
+        "        expires 30d;",
+        "    }",
+        "}");
+    }
   } else {
-    lines.push("server {");
-    lines.push("    listen 80;");
-    lines.push("    server_name _;");
-    lines.push("");
-    lines.push("    root /var/www/html;");
-    lines.push("    index index.html index.htm;");
-    lines.push("}");
+    lines.push("server {", "    listen 80;", "    server_name _;", "", "    root /var/www/html;", "    index index.html index.htm;", "}");
   }
 
   lines.push("");
@@ -285,7 +314,8 @@ function generateSupervisor(title: string, services: SystemService[]): string {
   return lines.join("\n");
 }
 
-/** Generate Traefik dynamic YAML config with routers and load-balancer services. */
+/** Generate Traefik dynamic YAML config with routers and load-balancer services.
+ * Detects HTTPS services (443 port) and configures TLS routes accordingly. */
 function generateTraefik(title: string, services: SystemService[]): string {
   const lines: string[] = [
     `# ${title} — Traefik Dynamic Configuration`,
@@ -310,16 +340,60 @@ function generateTraefik(title: string, services: SystemService[]): string {
   ];
 
   for (const s of services) {
-    lines.push(`    ${s.name}:`);
+    const hasHttps = s.ports?.some((p) => {
+      const pNum =
+        typeof p === "string" && p.includes(":")
+          ? parseInt(p.split(":").pop()!, 10)
+          : Number(p);
+      return pNum === 443;
+    });
+
+    // Always add HTTP router
+    lines.push(`    ${s.name}-http:`);
     lines.push(`      rule: "Host(\`${s.name}.example.com\`)"`);
     lines.push(`      service: ${s.name}`);
-    lines.push(`      tls: {}`);
+    if (hasHttps) {
+      lines.push("      middlewares:");
+      lines.push("        - https-redirect");
+    }
+    lines.push("      entryPoints:");
+    lines.push("        - web");
+    lines.push("");
+
+    if (hasHttps) {
+      // Add HTTPS router with TLS
+      lines.push(`    ${s.name}-https:`);
+      lines.push(`      rule: "Host(\`${s.name}.example.com\`)"`);
+      lines.push(`      service: ${s.name}`);
+      lines.push("      tls: {}");
+      lines.push("      entryPoints:");
+      lines.push("        - websecure");
+      lines.push("");
+    }
+  }
+
+  if (services.some((s) => s.ports?.some((p) => {
+    const pNum =
+      typeof p === "string" && p.includes(":")
+        ? parseInt(p.split(":").pop()!, 10)
+        : Number(p);
+    return pNum === 443;
+  }))) {
+    lines.push("  middlewares:");
+    lines.push("    https-redirect:");
+    lines.push("      redirectScheme:");
+    lines.push("        scheme: https");
+    lines.push("        permanent: true");
     lines.push("");
   }
 
   lines.push("  services:");
   for (const s of services) {
-    const port = s.ports?.[0] || 80;
+    const rawPort = s.ports?.[0] || 80;
+    const port =
+      typeof rawPort === "string" && rawPort.includes(":")
+        ? parseInt(rawPort.split(":").pop()!, 10) || 80
+        : Number(rawPort) || 80;
     lines.push(`    ${s.name}:`);
     lines.push("      loadBalancer:");
     lines.push("        servers:");
