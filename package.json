@@ -55,15 +55,22 @@
     "@vitejs/plugin-react": "^6.0.1",
     "@vitest/coverage-v8": "^4.1.8",
     "depcheck": "^1.4.7",
-    "eslint": "^10",
+    "eslint": "^9",
     "eslint-config-next": "^16.2.7",
     "husky": "^9.1.7",
     "jsdom": "^29.1.1",
     "prettier": "^3.4.0",
     "typescript": "^6",
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.8",
+    "lint-staged": "^17.0.7"
   },
   "optionalDependencies": {
     "@emnapi/runtime": "^1.11.0"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,md,css,mdx}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
   }
 }

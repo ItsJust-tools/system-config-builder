@@ -1106,7 +1106,8 @@ body {
   align-items: center;
   padding: 0.125rem 0.375rem;
   font-size: 0.625rem;
-  font-family: ui-monospace, Menlo, Monaco, "Cascadia Code", "Segoe UI Mono", monospace;
+  font-family:
+    ui-monospace, Menlo, Monaco, "Cascadia Code", "Segoe UI Mono", monospace;
   font-weight: 500;
   color: var(--foreground);
   background: var(--card);
@@ -1280,7 +1281,8 @@ body {
   background: var(--card);
   color: var(--foreground);
   font-size: 0.75rem;
-  font-family: ui-monospace, Menlo, Monaco, "Cascadia Code", "Segoe UI Mono", monospace;
+  font-family:
+    ui-monospace, Menlo, Monaco, "Cascadia Code", "Segoe UI Mono", monospace;
   resize: vertical;
   min-height: 3.5rem;
 }

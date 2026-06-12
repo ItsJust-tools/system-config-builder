@@ -1,10 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useRef, useState } from "react";
-import {
-  ToolShell,
-  useTool,
-} from "@itsjust/core";
+import { ToolShell, useTool } from "@itsjust/core";
 import {
   configBuilderTool,
   ToolCanvas,
@@ -118,10 +115,7 @@ export default function ToolClient() {
         config={configBuilderTool.config}
         actions={toolbarActions}
         toolbar={
-          <ToolToolbar
-            type={tool.state.data.type}
-            onTypeChange={updateType}
-          />
+          <ToolToolbar type={tool.state.data.type} onTypeChange={updateType} />
         }
         sidebar={
           <ToolSidebar
