@@ -30,7 +30,11 @@ function generateDockerCompose(
       for (const vol of s.volumes) {
         const parts = vol.split(":");
         // Named volume (e.g. "pgdata:/path") vs bind mount ("/host:/container")
-        if (parts[0] && !parts[0].startsWith("/") && !parts[0].startsWith(".")) {
+        if (
+          parts[0] &&
+          !parts[0].startsWith("/") &&
+          !parts[0].startsWith(".")
+        ) {
           namedVolumes.add(parts[0]);
         }
       }
@@ -214,7 +218,17 @@ function generateNginx(title: string, services: SystemService[]): string {
     });
 
     if (hasHttps) {
-      lines.push("server {", "    listen 443 ssl;", `    server_name ${title}.example.com;`, "", "    ssl_certificate /etc/ssl/certs/example.com.pem;", "    ssl_certificate_key /etc/ssl/private/example.com.key;", "", "    location / {", `        proxy_pass http://localhost:${port};`,"        proxy_set_header Host $host;",
+      lines.push(
+        "server {",
+        "    listen 443 ssl;",
+        `    server_name ${title}.example.com;`,
+        "",
+        "    ssl_certificate /etc/ssl/certs/example.com.pem;",
+        "    ssl_certificate_key /etc/ssl/private/example.com.key;",
+        "",
+        "    location / {",
+        `        proxy_pass http://localhost:${port};`,
+        "        proxy_set_header Host $host;",
         "        proxy_set_header X-Real-IP $remote_addr;",
         "        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;",
         "        proxy_set_header X-Forwarded-Proto $scheme;",
@@ -235,7 +249,9 @@ function generateNginx(title: string, services: SystemService[]): string {
         "}",
       );
     } else {
-      lines.push("server {", "    listen 80;",
+      lines.push(
+        "server {",
+        "    listen 80;",
         `    server_name ${title}.example.com;`,
         "",
         "    location / {",
@@ -250,10 +266,19 @@ function generateNginx(title: string, services: SystemService[]): string {
         "        alias /var/www/static/;",
         "        expires 30d;",
         "    }",
-        "}");
+        "}",
+      );
     }
   } else {
-    lines.push("server {", "    listen 80;", "    server_name _;", "", "    root /var/www/html;", "    index index.html index.htm;", "}");
+    lines.push(
+      "server {",
+      "    listen 80;",
+      "    server_name _;",
+      "",
+      "    root /var/www/html;",
+      "    index index.html index.htm;",
+      "}",
+    );
   }
 
   lines.push("");
@@ -372,13 +397,17 @@ function generateTraefik(title: string, services: SystemService[]): string {
     }
   }
 
-  if (services.some((s) => s.ports?.some((p) => {
-    const pNum =
-      typeof p === "string" && p.includes(":")
-        ? parseInt(p.split(":").pop()!, 10)
-        : Number(p);
-    return pNum === 443;
-  }))) {
+  if (
+    services.some((s) =>
+      s.ports?.some((p) => {
+        const pNum =
+          typeof p === "string" && p.includes(":")
+            ? parseInt(p.split(":").pop()!, 10)
+            : Number(p);
+        return pNum === 443;
+      }),
+    )
+  ) {
     lines.push("  middlewares:");
     lines.push("    https-redirect:");
     lines.push("      redirectScheme:");
@@ -582,7 +611,11 @@ export function ToolCanvas({
             aria-label="Download configuration file"
             disabled={servicesEmpty}
             aria-disabled={servicesEmpty}
-            title={servicesEmpty ? "Add a service first" : "Download configuration file"}
+            title={
+              servicesEmpty
+                ? "Add a service first"
+                : "Download configuration file"
+            }
           >
             {downloadFeedback ? "✅ Downloaded!" : "⬇️ Download"}
           </button>

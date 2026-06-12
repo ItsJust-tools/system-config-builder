@@ -17,11 +17,11 @@ interface ToolToolbarProps {
  * @param props.type - Current configuration type
  * @param props.onTypeChange - Callback when the config type changes
  */
-export function ToolToolbar({
-  type,
-  onTypeChange,
-}: ToolToolbarProps) {
-  const configOptions = Object.entries(configTypeLabels) as [ConfigType, string][];
+export function ToolToolbar({ type, onTypeChange }: ToolToolbarProps) {
+  const configOptions = Object.entries(configTypeLabels) as [
+    ConfigType,
+    string,
+  ][];
 
   return (
     <div className="config-toolbar-inner">
@@ -49,7 +49,9 @@ export function ToolToolbar({
       <kbd className="config-toolbar-kbd">Ctrl+Shift+C</kbd>
       <span className="config-toolbar-label config-toolbar-label-sm">Copy</span>
       <kbd className="config-toolbar-kbd">Ctrl+Shift+D</kbd>
-      <span className="config-toolbar-label config-toolbar-label-sm">Download</span>
+      <span className="config-toolbar-label config-toolbar-label-sm">
+        Download
+      </span>
     </div>
   );
 }

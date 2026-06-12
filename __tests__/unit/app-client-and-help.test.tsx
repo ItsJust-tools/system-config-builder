@@ -9,7 +9,10 @@ vi.mock("next/link", () => ({
     href,
     children,
     ...props
-  }: { href: string; children: ReactNode }) => (
+  }: {
+    href: string;
+    children: ReactNode;
+  }) => (
     <a href={href} {...props}>
       {children}
     </a>
@@ -17,10 +20,9 @@ vi.mock("next/link", () => ({
 }));
 
 vi.mock("next/dynamic", () => ({
-  default:
-    () =>
-    () =>
-      <div data-testid="dynamic-tool-client">dynamic-tool-client</div>,
+  default: () => () => (
+    <div data-testid="dynamic-tool-client">dynamic-tool-client</div>
+  ),
 }));
 
 const mockSetData = vi.fn();
@@ -33,9 +35,7 @@ vi.mock("@itsjust/core", () => ({
         type: "docker-compose",
         title: "my-app",
         description: "My application stack",
-        services: [
-          { name: "web", image: "nginx:alpine", ports: [80] },
-        ],
+        services: [{ name: "web", image: "nginx:alpine", ports: [80] }],
         network: "bridge",
         volumeDriver: "local",
         notes: "",
@@ -101,9 +101,7 @@ vi.mock("@/tool", () => ({
       type: "docker-compose",
       title: "my-app",
       description: "My application stack",
-      services: [
-        { name: "web", image: "nginx:alpine", ports: [80] },
-      ],
+      services: [{ name: "web", image: "nginx:alpine", ports: [80] }],
       network: "bridge",
       volumeDriver: "local",
       notes: "",
@@ -120,11 +118,7 @@ vi.mock("@/tool", () => ({
     }),
   },
   ToolCanvas: () => <div data-testid="mock-canvas">canvas</div>,
-  ToolToolbar: ({
-    onTypeChange,
-  }: {
-    onTypeChange: (type: string) => void;
-  }) => (
+  ToolToolbar: ({ onTypeChange }: { onTypeChange: (type: string) => void }) => (
     <div>
       <button
         type="button"

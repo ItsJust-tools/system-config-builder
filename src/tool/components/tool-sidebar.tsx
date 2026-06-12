@@ -34,9 +34,7 @@ function ServiceCard({
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState(service.name);
   const [editImage, setEditImage] = useState(service.image);
-  const [editPorts, setEditPorts] = useState(
-    service.ports?.join(", ") ?? "",
-  );
+  const [editPorts, setEditPorts] = useState(service.ports?.join(", ") ?? "");
   const [editRestart, setEditRestart] = useState(service.restart ?? "");
   const [editVolumes, setEditVolumes] = useState(
     service.volumes?.join(", ") ?? "",
@@ -253,7 +251,9 @@ DATABASE_URL=postgres://user:pass@db:5432/app"
               value={editLabels}
               onChange={(e) => setEditLabels(e.target.value)}
               className="config-edit-textarea"
-              placeholder={'com.example.vendor=\"ACME\"\ncom.example.version=\"1.0\"'}
+              placeholder={
+                'com.example.vendor=\"ACME\"\ncom.example.version=\"1.0\"'
+              }
               rows={2}
               aria-label="Container labels"
             />
@@ -351,9 +351,7 @@ DATABASE_URL=postgres://user:pass@db:5432/app"
         </div>
       )}
       {service.restart && (
-        <div className="config-service-meta">
-          Restart: {service.restart}
-        </div>
+        <div className="config-service-meta">Restart: {service.restart}</div>
       )}
       {service.containerName && (
         <div className="config-service-meta">

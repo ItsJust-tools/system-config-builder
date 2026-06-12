@@ -27,15 +27,15 @@ A client-side tool for generating system configuration files. Create Docker Comp
 
 ## Configuration Types
 
-| Type           | Description                    | File Extension |
-| -------------- | ------------------------------ | -------------- |
-| Docker Compose | Container orchestration        | `compose.yml`  |
-| Dockerfile     | Container build instructions   | `Dockerfile`   |
-| Systemd        | System service units           | `.service`     |
-| NGINX          | Web server configuration       | `.conf`        |
-| WireGuard      | VPN configuration              | `.conf`        |
-| Supervisor     | Process manager config         | `.ini`         |
-| Traefik        | Reverse proxy config (YAML)    | `.yml`         |
+| Type           | Description                  | File Extension |
+| -------------- | ---------------------------- | -------------- |
+| Docker Compose | Container orchestration      | `compose.yml`  |
+| Dockerfile     | Container build instructions | `Dockerfile`   |
+| Systemd        | System service units         | `.service`     |
+| NGINX          | Web server configuration     | `.conf`        |
+| WireGuard      | VPN configuration            | `.conf`        |
+| Supervisor     | Process manager config       | `.ini`         |
+| Traefik        | Reverse proxy config (YAML)  | `.yml`         |
 
 ## Usage
 
@@ -68,22 +68,22 @@ npm test
 
 Each service can be configured with:
 
-| Field              | Description                                          | Example                     |
-| ------------------ | ---------------------------------------------------- | --------------------------- |
-| **Name**           | Service identifier                                   | `web`                       |
-| **Image**          | Docker/container image                               | `nginx:alpine`              |
-| **Ports**          | Comma-separated, supports host:container mapping     | `80, 443, 8080:80`          |
-| **Restart policy** | Container restart behavior                           | `always`, `on-failure`      |
-| **Volumes**        | Comma-separated bind mounts or named volumes          | `./data:/data`, `pgdata:/var/lib/postgresql/data` |
-| **Env vars**       | Key=value pairs, one per line or comma-separated     | `NODE_ENV=production`       |
-| **Depends on**     | Comma-separated service names for startup ordering   | `db, redis`                 |
+| Field              | Description                                        | Example                                           |
+| ------------------ | -------------------------------------------------- | ------------------------------------------------- |
+| **Name**           | Service identifier                                 | `web`                                             |
+| **Image**          | Docker/container image                             | `nginx:alpine`                                    |
+| **Ports**          | Comma-separated, supports host:container mapping   | `80, 443, 8080:80`                                |
+| **Restart policy** | Container restart behavior                         | `always`, `on-failure`                            |
+| **Volumes**        | Comma-separated bind mounts or named volumes       | `./data:/data`, `pgdata:/var/lib/postgresql/data` |
+| **Env vars**       | Key=value pairs, one per line or comma-separated   | `NODE_ENV=production`                             |
+| **Depends on**     | Comma-separated service names for startup ordering | `db, redis`                                       |
 
 ## Keyboard Shortcuts
 
-| Shortcut         | Action                      |
-| ---------------- | --------------------------- |
-| `Ctrl+Shift+C`   | Copy configuration to clipboard |
-| `Ctrl+Shift+D`   | Download configuration file |
+| Shortcut       | Action                          |
+| -------------- | ------------------------------- |
+| `Ctrl+Shift+C` | Copy configuration to clipboard |
+| `Ctrl+Shift+D` | Download configuration file     |
 
 ## Accessibility
 
