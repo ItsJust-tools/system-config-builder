@@ -14,8 +14,7 @@
     "declarationMap": true,
     "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": "./src",
-    "ignoreDeprecations": "6.0"
+    "rootDir": "./src"
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules", "__tests__"]
