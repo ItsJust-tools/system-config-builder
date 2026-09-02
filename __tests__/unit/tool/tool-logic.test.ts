@@ -26,7 +26,7 @@ describe("Config builder tool definition", () => {
     expect(state.title).toBe("my-app");
     expect(state.description).toBe("My application stack");
     expect(state.services).toHaveLength(1);
-    expect(state.services[0].name).toBe("web");
+    expect(state.services[0]!.name).toBe("web");
     expect(state.network).toBe("bridge");
     expect(state.volumeDriver).toBe("local");
     expect(state.notes).toBe("");
@@ -100,7 +100,7 @@ describe("Config builder tool definition", () => {
       expect(result.data.type).toBe("nginx");
       expect(result.data.title).toBe("My NGINX Config");
       expect(result.data.services).toHaveLength(1);
-      expect(result.data.services[0].name).toBe("proxy");
+      expect(result.data.services[0]!.name).toBe("proxy");
       expect(result.data.network).toBe("host");
       expect(result.data.notes).toBe("Production config");
     }
