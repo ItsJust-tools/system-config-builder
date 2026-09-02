@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { SystemService } from "../types";
 import { configTypeLabels } from "../types";
+import { copyTextToClipboard } from "@itsjust/core";
 
 /** Props for the ToolCanvas component. */
 interface ToolCanvasProps {
@@ -529,16 +530,12 @@ export function ToolCanvas({
     };
   }, []);
 
-  const handleCopy = useCallback(() => {
-    if (navigator.clipboard) {
-      navigator.clipboard
-        .writeText(output)
-        .then(() => {
-          setCopyFeedback(true);
-          if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
-          copyTimerRef.current = setTimeout(() => setCopyFeedback(false), 2000);
-        })
-        .catch(() => {});
+  const handleCopy = useCallback(async () => {
+    const copied = await copyTextToClipboard(output);
+    if (copied) {
+      setCopyFeedback(true);
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+      copyTimerRef.current = setTimeout(() => setCopyFeedback(false), 2000);
     }
   }, [output]);
 
