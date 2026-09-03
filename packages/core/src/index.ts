@@ -111,3 +111,10 @@ export { ErrorBoundary } from "./components/error-boundary/error-boundary";
 // i18n
 /** Minimal i18n string map and helper. */
 export { t } from "./i18n/strings";
+
+// Utils
+/**
+ * copyTextToClipboard — Copy text with graceful fallback for insecure
+ * origins and permission rejections (async Clipboard API -> execCommand).
+ */
+export { copyTextToClipboard, execCommandCopy } from "./utils/clipboard";
