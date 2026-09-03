@@ -8,6 +8,7 @@ import ErrorPage from "@/app/error";
 import NotFound from "@/app/not-found";
 import { JsonLd } from "@/app/json-ld";
 import ToolPage from "@/app/page";
+import RootLayout from "@/app/layout";
 import { generateJsonLd, generateToolMetadata } from "@/lib/seo";
 import toolConfig from "@/tool/tool.config";
 import { templateMetadata } from "@/tool/template-metadata";
@@ -26,6 +27,10 @@ vi.mock("next/link", () => ({
       {children}
     </a>
   ),
+}));
+
+vi.mock("next/font/google", () => ({
+  Geist: () => ({ variable: "--font-geist-sans" }),
 }));
 
 vi.mock("@/app/tool-client-wrapper", () => ({
@@ -83,6 +88,29 @@ describe("app and seo", () => {
     expect(
       document.querySelector('script[type="application/ld+json"]'),
     ).toBeInTheDocument();
+  });
+
+  it("provides a skip-to-content bypass link (WCAG 2.2 AAA)", () => {
+    const { container } = render(
+      <RootLayout>
+        <div>page content</div>
+      </RootLayout>,
+    );
+
+    // The skip link must be the first focusable element and target #main-content.
+    const skipLink = screen.getByRole("link", { name: "Skip to content" });
+    expect(skipLink).toHaveAttribute("href", "#main-content");
+    expect(skipLink).toHaveClass("skip-nav");
+
+    // The main content region must carry the matching id.
+    const main = document.getElementById("main-content");
+    expect(main).not.toBeNull();
+    expect(main?.tagName.toLowerCase()).toBe("main");
+
+    // The skip link must appear before the main content in the DOM so it is
+    // the first tab stop for keyboard users.
+    const skipLinkPosition = skipLink.compareDocumentPosition(main!);
+    expect(skipLinkPosition & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   it("covers tool definition and helper exports", () => {
