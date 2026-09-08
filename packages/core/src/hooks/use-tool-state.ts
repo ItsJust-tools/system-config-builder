@@ -3,7 +3,7 @@
 import { useCallback, useMemo, useRef, useState, useEffect } from "react";
 import type { AutoSaveOptions, ToolState } from "../types";
 import { defaultAutoSaveOptions } from "../types";
-import { StorageManager } from "../engines/storage-manager";
+import { StorageManager, isStorageFailure } from "../engines/storage-manager";
 
 const HISTORY_KEY = (key: string) => `itsjust:history:${key}`;
 const NAMESPACE_KEY = "itsjust:storage-namespace";
@@ -62,6 +62,16 @@ export function useToolState<T>(
     [opts.historyStorage],
   );
   const historyPrefix = opts.historyNamespace ?? storageNamespace;
+
+  // Surface storage unavailability (quota exceeded / private browsing) to the host
+  // UI via an optional non-intrusive callback AND a console warning.
+  const warnStorage = useCallback(
+    (message: string) => {
+      console.warn(`[useToolState] ${message}`);
+      opts.onStorageWarning?.(message);
+    },
+    [opts],
+  );
   const [data, setDataInternal] = useState<T>(initial);
   const historyRef = useRef<T[]>([initial]);
   const futureRef = useRef<T[]>([]);
@@ -139,12 +149,9 @@ export function useToolState<T>(
       );
       return true;
     } catch (error) {
-      if (
-        error instanceof DOMException &&
-        error.name === "QuotaExceededError"
-      ) {
-        console.warn(
-          `[useToolState] Quota exceeded persisting history for "${opts.key}"`,
+      if (isStorageFailure(error)) {
+        warnStorage(
+          `Storage quota/safety exception persisting history for "${opts.key}".`,
         );
       } else {
         console.warn(
@@ -154,7 +161,7 @@ export function useToolState<T>(
       }
       return false;
     }
-  }, [opts.key, historyPrefix, historyStorage]);
+  }, [opts.key, historyPrefix, historyStorage, warnStorage]);
 
   useEffect(() => {
     if (!opts.enabled) return;
@@ -176,12 +183,9 @@ export function useToolState<T>(
         await persistHistory();
         firstDirtyAtRef.current = null;
       } catch (error) {
-        if (
-          error instanceof DOMException &&
-          error.name === "QuotaExceededError"
-        ) {
-          console.warn(
-            `[useToolState] Quota exceeded saving state for "${opts.key}"`,
+        if (isStorageFailure(error)) {
+          warnStorage(
+            `Storage quota/safety exception saving state for "${opts.key}". Changes may not persist.`,
           );
         }
       } finally {
@@ -200,6 +204,7 @@ export function useToolState<T>(
     opts.version,
     persistHistory,
     storage,
+    warnStorage,
   ]);
 
   // Clear timer when auto-save is disabled
@@ -287,12 +292,18 @@ export function useToolState<T>(
       setLastSaved(new Date().toISOString());
       await persistHistory();
       firstDirtyAtRef.current = null;
-    } catch {
-      // storage failure is silent by design — caller can observe isDirty
+    } catch (error) {
+      // Storage failures are surfaced via warnStorage (quota/private browsing);
+      // otherwise silent by design — caller can observe isDirty.
+      if (isStorageFailure(error)) {
+        warnStorage(
+          `Storage quota/safety exception on manual save for "${opts.key}". Changes may not persist.`,
+        );
+      }
     } finally {
       setIsSaving(false);
     }
-  }, [opts.key, opts.version, data, persistHistory, storage]);
+  }, [opts.key, opts.version, data, persistHistory, storage, warnStorage]);
 
   return {
     data,

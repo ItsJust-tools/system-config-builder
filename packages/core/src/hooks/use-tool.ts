@@ -66,7 +66,16 @@ export function useTool<TState>(
     }
   }
 
-  const state = useToolState<TState>(tool.initialState, { key: canonicalId });
+  const { toast } = useToast();
+
+  const state = useToolState<TState>(tool.initialState, {
+    key: canonicalId,
+    onStorageWarning: (message) => {
+      // Non-intrusive warning toast when storage quota is exceeded or storage
+      // is blocked (private browsing). State flow continues uninterrupted.
+      toast(message.length > 0 ? message : t("storageUnavailable"), "error");
+    },
+  });
   const { exportTo, abortExport, supportedFormats, isExporting } = useExport(
     canvasRef,
     tool.config,
@@ -86,7 +95,6 @@ export function useTool<TState>(
       }
     },
   });
-  const { toast } = useToast();
 
   const handleExport = useCallback(
     async (format: ExportFormat) => {

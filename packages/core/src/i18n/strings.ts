@@ -39,6 +39,8 @@ export const strings = {
     enableHighContrast: "Enable high contrast",
     disableHighContrast: "Disable high contrast",
     dismissNotification: "Dismiss notification",
+    storageUnavailable:
+      "Couldn't save your work automatically (storage full or private browsing). Your changes may not persist on reload.",
     skipToContent: "Skip to content",
     toolToolbar: "Tool toolbar",
     importExport: "Import and Export",
