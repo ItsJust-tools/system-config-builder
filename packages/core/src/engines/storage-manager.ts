@@ -3,6 +3,21 @@ import { compressToUTF16, decompressFromUTF16 } from "lz-string";
 
 export type StorageLoadStatus = "missing" | "ok" | "corrupt";
 
+/**
+ * Detect storage failures that must never break the application state flow:
+ * - `QuotaExceededError` / `NS_ERROR_DOM_QUOTA_REACHED` (disk full, huge payloads)
+ * - `SecurityError` / `NS_ERROR_FILE_QUOTA` (Private/Incognito mode, blocked cookies)
+ */
+export function isStorageFailure(error: unknown): boolean {
+  return (
+    error instanceof DOMException &&
+    (error.name === "QuotaExceededError" ||
+      error.name === "SecurityError" ||
+      error.name === "NS_ERROR_DOM_QUOTA_REACHED" ||
+      error.name === "NS_ERROR_FILE_QUOTA")
+  );
+}
+
 export interface StorageLoadResult<T> {
   status: StorageLoadStatus;
   data: T | null;
@@ -47,11 +62,10 @@ export class StorageManager {
     try {
       localStorage.setItem(this.key(key), JSON.stringify(entry));
     } catch (error) {
-      if (
-        error instanceof DOMException &&
-        error.name === "QuotaExceededError"
-      ) {
-        console.warn(`[StorageManager] Quota exceeded saving "${key}"`);
+      if (isStorageFailure(error)) {
+        console.warn(
+          `[StorageManager] Storage unavailable saving "${key}" (${(error as DOMException).name ?? "error"}). State will not persist.`,
+        );
       } else {
         console.warn(`[StorageManager] Failed to save "${key}":`, error);
       }
@@ -60,7 +74,18 @@ export class StorageManager {
   }
 
   loadEntry<T>(key: string, expectedVersion?: string): StorageLoadResult<T> {
-    const raw = localStorage.getItem(this.key(key));
+    let raw: string | null = null;
+    try {
+      raw = localStorage.getItem(this.key(key));
+    } catch {
+      // Private/Incognito mode and blocked-storage rules throw SecurityError on
+      // read as well as write. Treat as "missing" so the app proceeds with the
+      // initial state instead of crashing.
+      console.warn(
+        `[StorageManager] Storage unavailable reading "${key}". Falling back to defaults.`,
+      );
+      return { status: "missing", data: null };
+    }
     if (!raw) return { status: "missing", data: null };
     try {
       const entry: StorageData<unknown> = JSON.parse(raw);
@@ -91,7 +116,12 @@ export class StorageManager {
   }
 
   remove(key: string): void {
-    localStorage.removeItem(this.key(key));
+    try {
+      localStorage.removeItem(this.key(key));
+    } catch {
+      // Blocked storage should never throw out of a reset/clear flow.
+      console.warn(`[StorageManager] Storage unavailable removing "${key}".`);
+    }
   }
 }
 

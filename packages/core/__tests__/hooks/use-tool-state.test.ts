@@ -177,8 +177,35 @@ describe("useToolState", () => {
 
     expect(result.current.data).toBe("change");
     expect(warnSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Quota exceeded"),
+      expect.stringContaining("Storage quota/safety exception"),
     );
     warnSpy.mockRestore();
+  });
+
+  it("invokes onStorageWarning callback on quota/safety failures", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new DOMException("Quota exceeded", "QuotaExceededError");
+    });
+    const onStorageWarning = vi.fn();
+
+    const { result } = renderHook(() =>
+      useToolState("initial", {
+        key: "test-warning",
+        enabled: true,
+        debounceMs: 500,
+        onStorageWarning,
+      }),
+    );
+
+    act(() => result.current.setData("change"));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(500);
+    });
+
+    expect(result.current.data).toBe("change");
+    expect(onStorageWarning).toHaveBeenCalled();
+    expect(onStorageWarning.mock.calls[0]![0]).toContain("test-warning");
+    expect(onStorageWarning.mock.calls[0]![0]).toMatch(/quota|safety/i);
   });
 });

@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { StorageManager } from "../../src/engines/storage-manager";
+import {
+  StorageManager,
+  isStorageFailure,
+} from "../../src/engines/storage-manager";
 
 describe("StorageManager", () => {
   let manager: StorageManager;
@@ -48,7 +51,61 @@ describe("StorageManager", () => {
 
     await expect(manager.save("overflow", "x".repeat(1024))).rejects.toThrow();
     expect(warnSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Quota exceeded"),
+      expect.stringContaining("Storage unavailable saving"),
+    );
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("QuotaExceededError"),
+    );
+    warnSpy.mockRestore();
+  });
+
+  it("logs warning on SecurityError (private browsing) on save", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new DOMException("SecurityError", "SecurityError");
+    });
+
+    await expect(manager.save("private", "value")).rejects.toThrow();
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Storage unavailable"),
+    );
+    warnSpy.mockRestore();
+  });
+
+  it("isStorageFailure detects QuotaExceededError and SecurityError", () => {
+    expect(
+      isStorageFailure(new DOMException("quota", "QuotaExceededError")),
+    ).toBe(true);
+    expect(isStorageFailure(new DOMException("blocked", "SecurityError"))).toBe(
+      true,
+    );
+    expect(isStorageFailure(new Error("generic"))).toBe(false);
+  });
+
+  it("treats blocked reads (SecurityError) as missing, not corrupt", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
+      throw new DOMException("blocked", "SecurityError");
+    });
+
+    const result = manager.loadEntry("blocked-read");
+    expect(result.status).toBe("missing");
+    expect(result.data).toBeNull();
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Storage unavailable reading"),
+    );
+    warnSpy.mockRestore();
+  });
+
+  it("swallows remove() storage failures instead of throwing", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.spyOn(Storage.prototype, "removeItem").mockImplementation(() => {
+      throw new DOMException("blocked", "SecurityError");
+    });
+
+    expect(() => manager.remove("key")).not.toThrow();
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("unavailable removing"),
     );
     warnSpy.mockRestore();
   });

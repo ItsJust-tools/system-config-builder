@@ -21,6 +21,9 @@ export interface AutoSaveOptions {
   };
   historyStorage?: Pick<Storage, "getItem" | "setItem">;
   historyNamespace?: string;
+  /** Called when storage is unavailable (quota exceeded / private browsing) so the
+   *  host UI can surface a non-intrusive warning (e.g. toast) without breaking state flow. */
+  onStorageWarning?: (message: string) => void;
 }
 
 export const defaultAutoSaveOptions: AutoSaveOptions = {
