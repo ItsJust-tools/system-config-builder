@@ -24,4 +24,4 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 USER nextjs
 EXPOSE 3000
-CMD ["node", "server.js"]
+CMD ["node", "server.js"]HEALTHCHECK --interval=30s --timeout=3s CMD curl -f http://localhost:3000/ || exit 1
