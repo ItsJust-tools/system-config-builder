@@ -191,8 +191,19 @@ function generateSystemd(title: string): string {
   ].join("\n");
 }
 
+const NGINX_SSL_SETTINGS: string[] = [
+  "    ssl_protocols TLSv1.2 TLSv1.3;",
+  "    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305;",
+  "    ssl_prefer_server_ciphers off;",
+  "    ssl_session_timeout 1d;",
+  "    ssl_session_cache shared:MozSSL:10m;",
+  "    ssl_session_tickets off;",
+];
+
 /** Generate an NGINX virtual host config with proxy pass for the primary service.
  * Handles HTTP (port 80) and HTTPS (port 443) detection from service ports.
+ * Includes modern TLS 1.3/1.2 settings, HSTS and security headers, and
+ * WebSocket upgrade support via the standard $connection_upgrade map.
  * Uses the primary service's first port for proxy_pass. */
 function generateNginx(title: string, services: SystemService[]): string {
   const lines: string[] = [
@@ -210,6 +221,7 @@ function generateNginx(title: string, services: SystemService[]): string {
       typeof rawPort === "string" && rawPort.includes(":")
         ? parseInt(rawPort.split(":").pop()!, 10) || 80
         : Number(rawPort) || 80;
+    const upstream = `http://localhost:${port}`;
     const hasHttps = primaryService.ports?.some((p) => {
       const pNum =
         typeof p === "string" && p.includes(":")
@@ -218,21 +230,60 @@ function generateNginx(title: string, services: SystemService[]): string {
       return pNum === 443;
     });
 
+    // Connection upgrade map for WebSocket proxying (http context).
+    lines.push(
+      "# WebSocket upgrade map (http context)",
+      "map $http_upgrade $connection_upgrade {",
+      "    default upgrade;",
+      "    ''      close;",
+      "}",
+      "",
+    );
+
     if (hasHttps) {
       lines.push(
         "server {",
         "    listen 443 ssl;",
+        "    http2 on;",
         `    server_name ${title}.example.com;`,
         "",
         "    ssl_certificate /etc/ssl/certs/example.com.pem;",
         "    ssl_certificate_key /etc/ssl/private/example.com.key;",
         "",
+        "    # Modern TLS - Mozilla Intermediate compatibility",
+        ...NGINX_SSL_SETTINGS,
+        "",
+        "    # OCSP stapling",
+        "    ssl_stapling on;",
+        "    ssl_stapling_verify on;",
+        "",
+        "    # HSTS + security headers",
+        '    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;',
+        "    add_header X-Content-Type-Options nosniff always;",
+        "    add_header X-Frame-Options SAMEORIGIN always;",
+        "    add_header Referrer-Policy strict-origin-when-cross-origin always;",
+        '    add_header X-XSS-Protection "1; mode=block" always;',
+        "",
         "    location / {",
-        `        proxy_pass http://localhost:${port};`,
+        `        proxy_pass ${upstream};`,
         "        proxy_set_header Host $host;",
         "        proxy_set_header X-Real-IP $remote_addr;",
         "        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;",
         "        proxy_set_header X-Forwarded-Proto $scheme;",
+        "    }",
+        "",
+        "    # WebSocket upgrade support",
+        "    location /ws {",
+        `        proxy_pass ${upstream};`,
+        "        proxy_http_version 1.1;",
+        "        proxy_set_header Upgrade $http_upgrade;",
+        "        proxy_set_header Connection $connection_upgrade;",
+        "        proxy_set_header Host $host;",
+        "        proxy_set_header X-Real-IP $remote_addr;",
+        "        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;",
+        "        proxy_set_header X-Forwarded-Proto $scheme;",
+        "        proxy_read_timeout 86400s;",
+        "        proxy_send_timeout 86400s;",
         "    }",
         "",
         "    location /static/ {",
@@ -255,12 +306,32 @@ function generateNginx(title: string, services: SystemService[]): string {
         "    listen 80;",
         `    server_name ${title}.example.com;`,
         "",
+        "    # security headers (add HSTS once TLS is enabled)",
+        "    add_header X-Content-Type-Options nosniff always;",
+        "    add_header X-Frame-Options SAMEORIGIN always;",
+        "    add_header Referrer-Policy strict-origin-when-cross-origin always;",
+        '    add_header X-XSS-Protection "1; mode=block" always;',
+        "",
         "    location / {",
-        `        proxy_pass http://localhost:${port};`,
+        `        proxy_pass ${upstream};`,
         "        proxy_set_header Host $host;",
         "        proxy_set_header X-Real-IP $remote_addr;",
         "        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;",
         "        proxy_set_header X-Forwarded-Proto $scheme;",
+        "    }",
+        "",
+        "    # WebSocket upgrade support",
+        "    location /ws {",
+        `        proxy_pass ${upstream};`,
+        "        proxy_http_version 1.1;",
+        "        proxy_set_header Upgrade $http_upgrade;",
+        "        proxy_set_header Connection $connection_upgrade;",
+        "        proxy_set_header Host $host;",
+        "        proxy_set_header X-Real-IP $remote_addr;",
+        "        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;",
+        "        proxy_set_header X-Forwarded-Proto $scheme;",
+        "        proxy_read_timeout 86400s;",
+        "        proxy_send_timeout 86400s;",
         "    }",
         "",
         "    location /static/ {",
