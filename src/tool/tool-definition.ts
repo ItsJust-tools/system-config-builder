@@ -56,25 +56,32 @@ export const configBuilderTool: Tool<SystemConfigState> = {
       2,
     ),
   deserialize: (data) => {
-    if (isSystemConfigState(data)) {
+    try {
+      if (isSystemConfigState(data)) {
+        return {
+          success: true,
+          data: {
+            type: data.type,
+            title: data.title,
+            description: data.description,
+            services: data.services,
+            network: data.network || "bridge",
+            volumeDriver: data.volumeDriver || "local",
+            notes: data.notes || "",
+          },
+        };
+      }
       return {
-        success: true,
-        data: {
-          type: data.type,
-          title: data.title,
-          description: data.description,
-          services: data.services,
-          network: data.network || "bridge",
-          volumeDriver: data.volumeDriver || "local",
-          notes: data.notes || "",
-        },
+        success: false,
+        error:
+          "Invalid data format: expected { type: string, title: string, description: string, services: Service[], network?: string, volumeDriver?: string, notes?: string }",
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: `Failed to deserialize state: ${error instanceof Error ? error.message : String(error)}`,
       };
     }
-    return {
-      success: false,
-      error:
-        "Invalid data format: expected { type: string, title: string, description: string, services: Service[], network?: string, volumeDriver?: string, notes?: string }",
-    };
   },
   exporters: [
     { format: "png", loader: () => import("./exporters/png") },
