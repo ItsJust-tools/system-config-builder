@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { SystemService } from "../types";
 import { configTypeLabels } from "../types";
+import { generateEnvFile } from "../env-file";
 import { copyTextToClipboard } from "@itsjust/core";
 
 /** Props for the ToolCanvas component. */
@@ -12,9 +13,12 @@ interface ToolCanvasProps {
   network: string;
   volumeDriver: string;
   type: string;
+  /** Parameterize environment variables as ${VAR} and pair with a .env file. */
+  envFile?: boolean;
   canvasRef?: React.RefObject<HTMLDivElement | null>;
   onCopy?: () => void;
   onDownload?: () => void;
+  onDownloadEnv?: () => void;
 }
 
 /** Generate Docker Compose YAML from service definitions. */
@@ -23,6 +27,7 @@ function generateDockerCompose(
   services: SystemService[],
   network: string,
   volumeDriver: string,
+  envFile = false,
 ): string {
   // Collect unique named volumes from all services
   const namedVolumes = new Set<string>();
@@ -79,8 +84,12 @@ function generateDockerCompose(
 
     if (s.environment && Object.keys(s.environment).length > 0) {
       lines.push("    environment:");
-      for (const [key, val] of Object.entries(s.environment)) {
-        lines.push(`      ${key}: ${val}`);
+      for (const key of Object.keys(s.environment)) {
+        if (envFile) {
+          lines.push(`      ${key}: "\${${key}}"`);
+        } else {
+          lines.push(`      ${key}: ${s.environment[key]}`);
+        }
       }
     }
 
@@ -521,10 +530,17 @@ function generateConfig(
   services: SystemService[],
   network: string,
   volumeDriver: string,
+  envFile = false,
 ): string {
   switch (type) {
     case "docker-compose":
-      return generateDockerCompose(title, services, network, volumeDriver);
+      return generateDockerCompose(
+        title,
+        services,
+        network,
+        volumeDriver,
+        envFile,
+      );
     case "dockerfile":
       return generateDockerfile(title);
     case "systemd":
@@ -579,25 +595,35 @@ export function ToolCanvas({
   network,
   volumeDriver,
   type,
+  envFile,
   canvasRef,
   onCopy,
   onDownload,
+  onDownloadEnv,
 }: ToolCanvasProps) {
   const output = useMemo(
-    () => generateConfig(type, title, services, network, volumeDriver),
-    [type, title, services, network, volumeDriver],
+    () => generateConfig(type, title, services, network, volumeDriver, envFile),
+    [type, title, services, network, volumeDriver, envFile],
   );
+
+  const envOutput = useMemo(() => {
+    if (!envFile || type !== "docker-compose") return null;
+    return generateEnvFile(title, services);
+  }, [envFile, type, title, services]);
 
   const [copyFeedback, setCopyFeedback] = useState(false);
   const [downloadFeedback, setDownloadFeedback] = useState(false);
+  const [envDownloadFeedback, setEnvDownloadFeedback] = useState(false);
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const downloadTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const envTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     // Cleanup timers on unmount
     return () => {
       if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
       if (downloadTimerRef.current) clearTimeout(downloadTimerRef.current);
+      if (envTimerRef.current) clearTimeout(envTimerRef.current);
     };
   }, []);
 
@@ -628,6 +654,29 @@ export function ToolCanvas({
       URL.revokeObjectURL(url);
     }, 3000);
   }, [output, type, title]);
+
+  /** Trigger a file download for arbitrary content with a given filename. */
+  const downloadNamedFile = useCallback((content: string, filename: string) => {
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+  }, []);
+
+  const handleDownloadEnv = useCallback(() => {
+    if (!envOutput) return;
+    downloadNamedFile(
+      envOutput,
+      `${title.replace(/[^a-zA-Z0-9_-]/g, "_")}.env.example`,
+    );
+    setEnvDownloadFeedback(true);
+    if (envTimerRef.current) clearTimeout(envTimerRef.current);
+    envTimerRef.current = setTimeout(() => {
+      setEnvDownloadFeedback(false);
+    }, 3000);
+  }, [envOutput, title, downloadNamedFile]);
 
   const servicesEmpty = services.length === 0;
 
@@ -687,6 +736,17 @@ export function ToolCanvas({
           >
             {downloadFeedback ? "✅ Downloaded!" : "⬇️ Download"}
           </button>
+          {envOutput !== null && (
+            <button
+              type="button"
+              className={`config-btn config-btn-secondary config-btn-sm ${envDownloadFeedback ? "config-btn-downloaded" : ""}`}
+              onClick={onDownloadEnv || handleDownloadEnv}
+              aria-label="Download paired .env.example file"
+              title="Download the paired .env.example file"
+            >
+              {envDownloadFeedback ? "✅ Downloaded!" : "⬇️ .env"}
+            </button>
+          )}
         </div>
       </div>
     </div>

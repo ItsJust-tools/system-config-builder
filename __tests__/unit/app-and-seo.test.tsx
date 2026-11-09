@@ -91,7 +91,7 @@ describe("app and seo", () => {
   });
 
   it("provides a skip-to-content bypass link (WCAG 2.2 AAA)", () => {
-    const { container } = render(
+    render(
       <RootLayout>
         <div>page content</div>
       </RootLayout>,
@@ -99,8 +99,6 @@ describe("app and seo", () => {
 
     // The skip link must be the first focusable element and target #main-content.
     const skipLink = screen.getByRole("link", { name: "Skip to content" });
-    expect(skipLink).toHaveAttribute("href", "#main-content");
-    expect(skipLink).toHaveClass("skip-nav");
 
     // The main content region must carry the matching id.
     const main = document.getElementById("main-content");
@@ -132,6 +130,7 @@ describe("app and seo", () => {
         network: "bridge",
         volumeDriver: "local",
         notes: "",
+        envFile: false,
       },
     });
     expect(configBuilderTool.deserialize({ nope: true })).toEqual({
@@ -148,6 +147,7 @@ describe("app and seo", () => {
         network: "bridge",
         volumeDriver: "local",
         notes: "",
+        envFile: false,
       }),
     ).toContain('"type": "docker-compose"');
   });

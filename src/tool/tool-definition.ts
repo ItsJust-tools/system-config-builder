@@ -40,6 +40,7 @@ export const configBuilderTool: Tool<SystemConfigState> = {
     network: "bridge",
     volumeDriver: "local",
     notes: "",
+    envFile: false,
   },
   serialize: (state) =>
     JSON.stringify(
@@ -51,6 +52,7 @@ export const configBuilderTool: Tool<SystemConfigState> = {
         network: state.network,
         volumeDriver: state.volumeDriver,
         notes: state.notes,
+        envFile: state.envFile === true,
       },
       null,
       2,
@@ -68,6 +70,7 @@ export const configBuilderTool: Tool<SystemConfigState> = {
             network: data.network || "bridge",
             volumeDriver: data.volumeDriver || "local",
             notes: data.notes || "",
+            envFile: data.envFile === true,
           },
         };
       }
