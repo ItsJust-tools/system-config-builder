@@ -11,6 +11,7 @@ interface ToolSidebarProps {
   services: SystemService[];
   network: string;
   volumeDriver: string;
+  envFile: boolean;
   onAddService: () => void;
   onRemoveService: (index: number) => void;
   onUpdateService: (index: number, service: SystemService) => void;
@@ -19,6 +20,7 @@ interface ToolSidebarProps {
   onUpdateNotes: (notes: string) => void;
   onUpdateNetwork: (network: string) => void;
   onUpdateVolumeDriver: (volumeDriver: string) => void;
+  onUpdateEnvFile: (envFile: boolean) => void;
 }
 
 /** Inline props for a single service card with editing and removal controls. */
@@ -384,6 +386,8 @@ export function ToolSidebar({
   onUpdateNotes,
   onUpdateNetwork,
   onUpdateVolumeDriver,
+  envFile,
+  onUpdateEnvFile,
 }: ToolSidebarProps) {
   return (
     <div className="config-sidebar">
@@ -434,6 +438,31 @@ export function ToolSidebar({
             rows={2}
             aria-label="Configuration notes"
           />
+        </div>
+      </div>
+
+      {/* Export Options */}
+      <div className="sidebar-section">
+        <h3>Export</h3>
+        <div className="config-sidebar-field">
+          <label className="config-sidebar-label" htmlFor="sidebar-env-file">
+            Pair Docker Compose with .env file
+          </label>
+          <input
+            id="sidebar-env-file"
+            type="checkbox"
+            checked={envFile}
+            onChange={(e) => onUpdateEnvFile(e.target.checked)}
+            className="config-edit-checkbox"
+            aria-label="Pair Docker Compose with .env file"
+          />
+          {envFile && (
+            <p className="config-empty-hint">
+              Environment variables are emitted as &quot;$&#123;VAR&#125;&quot;
+              and a paired .env.example download appears next to the config
+              download.
+            </p>
+          )}
         </div>
       </div>
 

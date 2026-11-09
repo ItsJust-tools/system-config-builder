@@ -99,6 +99,13 @@ export default function ToolClient() {
     [setToolData],
   );
 
+  const updateEnvFile = useCallback(
+    (envFile: boolean) => {
+      setToolData((prev) => ({ ...prev, envFile }));
+    },
+    [setToolData],
+  );
+
   // --- Build toolbar actions ---
   const toolbarActions = useMemo(
     () => ({
@@ -125,6 +132,7 @@ export default function ToolClient() {
             services={tool.state.data.services}
             network={tool.state.data.network}
             volumeDriver={tool.state.data.volumeDriver}
+            envFile={tool.state.data.envFile}
             onAddService={addService}
             onRemoveService={removeService}
             onUpdateService={updateService}
@@ -133,6 +141,7 @@ export default function ToolClient() {
             onUpdateNotes={updateNotes}
             onUpdateNetwork={updateNetwork}
             onUpdateVolumeDriver={updateVolumeDriver}
+            onUpdateEnvFile={updateEnvFile}
           />
         }
         sidebarOpen={sidebarOpen}
@@ -143,6 +152,7 @@ export default function ToolClient() {
             services={tool.state.data.services}
             network={tool.state.data.network}
             volumeDriver={tool.state.data.volumeDriver}
+            envFile={tool.state.data.envFile}
             type={tool.state.data.type}
             canvasRef={canvasRef}
           />

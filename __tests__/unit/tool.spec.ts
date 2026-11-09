@@ -29,6 +29,7 @@ describe("System Config Builder Tool", () => {
         network: "bridge",
         volumeDriver: "local",
         notes: "",
+        envFile: false,
       };
 
       const serialized = configBuilderTool.serialize(state);

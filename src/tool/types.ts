@@ -27,6 +27,8 @@ export interface SystemConfigState {
   network: string;
   volumeDriver: string;
   notes: string;
+  /** When true, Docker Compose output uses ${VAR} substitution paired with an exported .env file. */
+  envFile: boolean;
 }
 
 export const configTypeLabels: Record<ConfigType, string> = {

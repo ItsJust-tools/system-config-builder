@@ -17,6 +17,7 @@ const defaultState: SystemConfigState = {
   network: "bridge",
   volumeDriver: "local",
   notes: "",
+  envFile: false,
 };
 
 describe("Config builder tool definition", () => {
