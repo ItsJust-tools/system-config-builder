@@ -125,7 +125,7 @@ npm run format
 
 ## Project Structure
 
-```
+```text
 src/
 ├── app/              # Next.js app router pages and layout
 │   ├── globals.css   # Theme variables and global styles
